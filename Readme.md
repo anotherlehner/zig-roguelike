@@ -50,3 +50,5 @@ https://rogueliketutorials.com/
 
 Roguelike dev subreddit
 https://www.reddit.com/r/roguelikedev/
+
+Note: I started this project in 2022 using a different username on gitlab.com and have since come back to github and reclaimed my old anotherlehner account.
