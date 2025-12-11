@@ -61,7 +61,7 @@ pub fn consoleFlush() void {
 }
 
 pub fn renderMap(console: TcodConsole, map: *models.Map) void {
-    for (map.tiles) |t, index| {
+    for (map.tiles, 0..) |t, index| {
         console.tiles[index].ch = t.dark.ch;
         console.tiles[index].fg = t.dark.fg;
         console.tiles[index].bg = t.dark.bg;

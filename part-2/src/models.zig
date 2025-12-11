@@ -73,7 +73,7 @@ pub const Map = struct {
     pub fn fill(self: *Map, tileToFill: Tile) void {
         var i: i32 = 0;
         while (i < self.width * self.height) : (i += 1) {
-            self.tiles[@intCast(usize,i)] = tileToFill;
+            self.tiles[@intCast(i)] = tileToFill;
         }
     }
 
@@ -85,22 +85,22 @@ pub const Map = struct {
         if (!self.inBounds(x,y)) {
             @panic("went outside of map");
         }
-        return &self.tiles[@intCast(usize, (self.width*x)+y)];
+        return &self.tiles[@intCast((self.width*x)+y)];
     }
 
     pub fn isWalkable(self: *Map, x: i32, y: i32) bool {
         if (!self.inBounds(x,y)) return false;
-        var loc = (self.width * y) + x;
+        const loc = (self.width * y) + x;
         if (loc > self.width * self.height) {
             std.log.info("outside map bounds, x: {d}, y: {d}, loc: {d}, mapsize: {d}", .{x,y, loc,(self.width*self.height)});
             @panic("went outside of map");
         }
-        return self.tiles[@intCast(usize, loc)].walkable;
+        return self.tiles[@intCast(loc)].walkable;
     }
 
     pub fn init(width: i32, height: i32, allocator: Allocator) !Map {
         const size = width * height;
-        var tiles = try allocator.alloc(Tile, @intCast(usize, size));
+        const tiles = try allocator.alloc(Tile, @intCast(size));
         var m = Map{.width=width, .height=height, .allocator=allocator, .tiles=tiles};
         m.fill(FLOOR);
         return m;
