@@ -1,4 +1,4 @@
-//! zig-roguelike, by @trymartinlehner
+//! zig-roguelike, by @anotherlehner
 const std = @import("std");
 const tcod = @import("tcod.zig");
 const color = @import("color.zig");

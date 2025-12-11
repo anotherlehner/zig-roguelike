@@ -1,4 +1,4 @@
-//! zig-roguelike, by @trymartinlehner
+//! zig-roguelike, by @anotherlehner
 const std = @import("std");
 
 const c = @cImport({

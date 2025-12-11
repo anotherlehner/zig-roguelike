@@ -1,4 +1,4 @@
-//! zig-roguelike, by @trymartinlehner
+//! zig-roguelike, by @anotherlehner
 
 // using small values now because the resulting window is large and easy to see
 pub const SCREEN_WIDTH: i32 = 40;
