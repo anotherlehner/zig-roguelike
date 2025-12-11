@@ -8,7 +8,7 @@ const c = @cImport({
 pub fn main() anyerror!void {
     // Note that info level log messages are by default printed only in Debug
     // and ReleaseSafe build modes.
-    std.log.info("tcod red: {s}", .{c.TCOD_red});
+    std.log.info("tcod red: {}", .{c.TCOD_red});
 }
 
 test "tcod red has lots of red in it" {

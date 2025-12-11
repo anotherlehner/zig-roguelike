@@ -1,35 +1,34 @@
 const std = @import("std");
 
-pub fn build(b: *std.build.Builder) void {
-    // Standard target options allows the person running `zig build` to choose
-    // what target to build for. Here we do not override the defaults, which
-    // means any target is allowed, and the default is native. Other options
-    // for restricting supported target set are available.
+pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
 
-    // Standard release options allow the person running `zig build` to select
-    // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
-    const mode = b.standardReleaseOptions();
+    const optimize = b.standardOptimizeOption(.{});
 
-    const exe = b.addExecutable("part-0", "src/main.zig");
-    exe.setTarget(target);
-    exe.setBuildMode(mode);
+    const exe = b.addExecutable(.{ 
+        .name = "part-0", 
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = optimize
+        })
+    });
     exe.linkLibC();
     exe.linkSystemLibrary("libtcod");
-    exe.install();
+    b.installArtifact(exe);
 
-    const run_cmd = exe.run();
-    run_cmd.step.dependOn(b.getInstallStep());
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
-    }
+    const run_cmd = b.addRunArtifact(exe);
 
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
 
-    const exe_tests = b.addTest("src/main.zig");
-    exe_tests.setTarget(target);
-    exe_tests.setBuildMode(mode);
+    const exe_tests = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = optimize
+        }),
+    });
     exe_tests.linkLibC();
     exe_tests.linkSystemLibrary("libtcod");
 
