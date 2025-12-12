@@ -24,21 +24,21 @@ pub fn main() anyerror!void {
     }
     tcod.consoleSetCustomFont("../dejavu10x10_gs_tc.png");
 
-    var console = tcod.consoleNew(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT);
+    const console = tcod.consoleNew(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT);
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
     defer {
         const leaked = gpa.deinit();
-        if (leaked) expect(false) catch @panic("FAIL");
+        if (leaked == .leak) expect(false) catch @panic("FAIL");
     }
 
-    var player = try ef.player(0, 0, allocator);
+    const player = try ef.player(0, 0, allocator);
 
     var map = try procgen.generateDungeon(constants.MAX_ROOMS, constants.ROOM_MIN_SIZE, constants.ROOM_MAX_SIZE, 
         constants.ROOM_MAX_MONSTERS, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT, player, allocator);
     defer {
-        map.deinit();
+        map.deinit(allocator);
     }
 
     var eng = engine.Engine.init(player, console, &map);

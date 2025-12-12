@@ -323,7 +323,7 @@ pub const Map = struct {
     pub fn fill(self: *Map, tileToFill: Tile) void {
         var i: i32 = 0;
         while (i < self.width * self.height) : (i += 1) {
-            self.tiles[@intCast(usize,i)] = tileToFill;
+            self.tiles[@intCast(i)] = tileToFill;
         }
     }
 
@@ -350,7 +350,7 @@ pub const Map = struct {
 
     pub fn init(width: i32, height: i32, allocator: Allocator) !Map {
         const size = width * height;
-        var tiles = try allocator.alloc(Tile, @intCast(usize, size));
+        var tiles = try allocator.alloc(Tile, @intCast(size));
         var m = Map{.width=width, .height=height, .allocator=allocator, .tiles=tiles};
         m.fill(FLOOR);
         return m;
@@ -390,7 +390,7 @@ var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 defer {
     const leaked = gpa.deinit();
-    if (leaked) expect(false) catch @panic("FAIL");
+    if (leaked == .leak) expect(false) catch @panic("FAIL");
 }
 
 var map = try models.Map.init(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT, allocator);

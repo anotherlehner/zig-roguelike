@@ -64,7 +64,7 @@ pub fn consoleFlush() void {
 pub fn renderMap(console: TcodConsole, map: *models.Map) void {
     var x: i32 = 0;
     var y: i32 = 0;
-    for (map.cells) |t, index| {
+    for (map.cells, 0..) |t, index| {
         if (mapIsInFov(map.tcMap, x, y)) {
             map.cells[index].visible = true;
             map.cells[index].explored = true;
@@ -96,7 +96,7 @@ pub fn renderMap(console: TcodConsole, map: *models.Map) void {
     for (map.entities.items) |ent| {
         var tile = map.get(ent.x,ent.y);
         if (tile.visible) {
-            var bg = .{.r=tile.light.bg.r,.g=tile.light.bg.g,.b=tile.light.bg.b};
+            const bg = TcodColorRGB{.r=tile.light.bg.r,.g=tile.light.bg.g,.b=tile.light.bg.b};
             consolePutCharEx(console, ent.x, ent.y, ent.glyph, ent.color, bg);
         }
     }

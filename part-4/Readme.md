@@ -61,7 +61,7 @@ Before this part 4 code I was rendering the tiles to the console by simply going
 pub fn renderMap(console: TcodConsole, map: *models.Map) void {
     var x: i32 = 0;
     var y: i32 = 0;
-    for (map.cells) |t, index| {
+    for (map.cells, 0..) |t, index| {
         if (mapIsInFov(map.tcMap, x, y)) {
             map.cells[index].visible = true;
             map.cells[index].explored = true;

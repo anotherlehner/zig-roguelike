@@ -4,7 +4,7 @@ const std = @import("std");
 const tcod = @import("tcod.zig");
 const ent = @import("entity.zig");
 const map = @import("map.zig");
-const RndGen = std.rand.DefaultPrng;
+const RndGen = std.Random.DefaultPrng;
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 const Map = map.Map;
@@ -26,20 +26,20 @@ pub const RectangularRoom = struct {
     }
 
     pub fn inner(self: RectangularRoom, allocator: Allocator) ![]Coord {
-        var innerList = ArrayList(Coord).init(allocator);
-        defer innerList.deinit();
+        var innerList: ArrayList(Coord) = .empty;
+        defer innerList.deinit(allocator);
         var xi: i32 = self.x1 + 1;
         while (xi < self.x2) : (xi += 1) {
             var yi: i32 = self.y1 + 1;
             while (yi < self.y2) : (yi += 1) {
-                try innerList.append(.{ .x = xi, .y = yi });
+                try innerList.append(allocator, .{ .x = xi, .y = yi });
             }
         }
-        return innerList.toOwnedSlice();
+        return innerList.toOwnedSlice(allocator);
     }
 
     pub fn init(x: i32, y: i32, width: i32, height: i32) RectangularRoom {
-        var r = RectangularRoom{
+        const r = RectangularRoom{
             .x1 = x,
             .y1 = y,
             .x2 = width + x,
@@ -55,14 +55,15 @@ pub const RectangularRoom = struct {
 
 pub fn placeEntities(room: *RectangularRoom, m: *Map, maxMonsters: i32, allocator: Allocator) !void {
     var rnd = RndGen.init(0);
-    rnd.seed(@intCast(u64, std.time.milliTimestamp()));
+    const now = try std.time.Instant.now();
+    rnd.seed(@intCast(now.timestamp.sec));
 
-    var nMonsters = rnd.random().intRangeAtMost(i32, 0, maxMonsters);
+    const nMonsters = rnd.random().intRangeAtMost(i32, 0, maxMonsters);
     var i: usize = 0;
     while (i < nMonsters) {
-        var x: i32 = rnd.random().intRangeAtMost(i32, room.x1+1, room.x2-1);
-        var y: i32 = rnd.random().intRangeAtMost(i32, room.y1+1, room.y2-1);
-        var monsterType = rnd.random().intRangeAtMost(i32, 1, 10);
+        const x: i32 = rnd.random().intRangeAtMost(i32, room.x1+1, room.x2-1);
+        const y: i32 = rnd.random().intRangeAtMost(i32, room.y1+1, room.y2-1);
+        const monsterType = rnd.random().intRangeAtMost(i32, 1, 10);
         if (monsterType < 8) {
             try m.addEntity(try ent.orc(x,y, allocator));
         } else {
@@ -74,10 +75,11 @@ pub fn placeEntities(room: *RectangularRoom, m: *Map, maxMonsters: i32, allocato
 
 pub fn tunnelBetween(start: Coord, end: Coord, allocator: Allocator) ![]Coord {
     var rnd = RndGen.init(0);
-    rnd.seed(@intCast(u64, std.time.milliTimestamp()));
+    const now = try std.time.Instant.now();
+    rnd.seed(@intCast(now.timestamp.sec));
 
-    var innerList = ArrayList(Coord).init(allocator);
-    defer innerList.deinit();
+    var innerList: ArrayList(Coord) = .empty;
+    defer innerList.deinit(allocator);
 
     var cornerX: i32 = undefined;
     var cornerY: i32 = undefined;
@@ -89,13 +91,13 @@ pub fn tunnelBetween(start: Coord, end: Coord, allocator: Allocator) ![]Coord {
         cornerY = end.y;
     }
 
-    try line(start, .{.x=cornerX,.y=cornerY}, &innerList);
-    try line(.{.x=cornerX,.y=cornerY}, end, &innerList);
+    try line(start, .{.x=cornerX,.y=cornerY}, &innerList, allocator);
+    try line(.{.x=cornerX,.y=cornerY}, end, &innerList, allocator);
 
-    return innerList.toOwnedSlice();
+    return innerList.toOwnedSlice(allocator);
 }
 
-pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord)) !void {
+pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord), allocator: Allocator) !void {
     if (start.eql(end)) {
         // Only seems to happen because a corner wasn't needed
         // std.log.info("line: zero length line sequence {} == {}", .{start,end});
@@ -105,9 +107,9 @@ pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord)) !void {
     var y: i32 = undefined;
     tcod.lineInit(start.x, start.y, end.x, end.y);
     _ = tcod.lineStep(&x, &y);
-    try innerList.append(.{ .x = x, .y = y });
+    try innerList.append(allocator, .{ .x = x, .y = y });
     while (!tcod.lineStep(&x, &y)) {
-        try innerList.append(.{ .x = x, .y = y });
+        try innerList.append(allocator, .{ .x = x, .y = y });
     }
 }
 
@@ -119,7 +121,8 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
     defer allocator.free(rooms);
     
     var rnd = RndGen.init(0);
-    rnd.seed(@intCast(u64, std.time.milliTimestamp()));
+    const now = try std.time.Instant.now();
+    rnd.seed(@intCast(now.timestamp.sec));
 
     var i: usize = 0;
     while (i < max_rooms) {
@@ -140,7 +143,7 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
 
         if (!interscts) {
             // carve out the room insides
-            var roomInner = try room.inner(allocator);
+            const roomInner = try room.inner(allocator);
             defer allocator.free(roomInner);
             for (roomInner) |coord| {
                 m.set(coord.x, coord.y, map.FLOOR);
@@ -151,7 +154,7 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
                 player.x = center.x;
                 player.y = center.y;
             } else {
-                var tunnelCoords: []Coord = try tunnelBetween(rooms[i-1].center(), room.center(), allocator);
+                const tunnelCoords: []Coord = try tunnelBetween(rooms[i-1].center(), room.center(), allocator);
                 defer allocator.free(tunnelCoords);
                 for (tunnelCoords) |c| {
                     m.set(c.x, c.y, map.FLOOR);
@@ -176,8 +179,8 @@ test "tunnelBetween" {
 }
 
 test "line" {
-    var innerList = ArrayList(Coord).init(std.testing.allocator);
-    defer innerList.deinit();
+    var innerList: ArrayList(Coord) = .empty;
+    defer innerList.deinit(std.testing.allocator);
     try line(.{.x=0,.y=0}, .{.x=2,.y=2}, &innerList);
     try expect(innerList.items.len == 2);
     try expect(std.meta.eql(innerList.items[0], Coord{.x=1,.y=1}));

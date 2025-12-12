@@ -17,8 +17,8 @@ fn performEscapeAction(eng: *engine.Engine) void {
 }
 
 fn performBumpAction(map: *mdl.Map, player: *mdl.Entity, bump: mdl.BumpAction) void {
-    var nx = player.x+bump.dx;
-    var ny = player.y+bump.dy;
+    const nx = player.x+bump.dx;
+    const ny = player.y+bump.dy;
     if (map.getBlockingEntity(nx,ny)) |target| {
         performMeleeAction(map, player, target);
     } else {
@@ -36,5 +36,5 @@ fn performMoveAction(map: *mdl.Map, player: *mdl.Entity, nx: i32, ny: i32) void 
 fn performMeleeAction(map: *mdl.Map, player: *mdl.Entity, target: *mdl.Entity) void {
     _ = player;
     _ = map;
-    std.debug.print("You kick {}\n", .{target.name});
+    std.debug.print("You kick {s}\n", .{target.name});
 }

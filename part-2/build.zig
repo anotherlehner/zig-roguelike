@@ -6,7 +6,7 @@ pub fn build(b: *std.Build) void {
 
     // Application exe
     const exe = b.addExecutable(.{ 
-        .name = "part-0", 
+        .name = "zrl", 
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/main.zig"),
             .target = target,

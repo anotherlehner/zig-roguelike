@@ -56,7 +56,7 @@ fn renderMap(console: tcod.TcodConsole, m: *map.Map) void {
     for (orderedEntities) |e| {
         var tile = m.get(e.x,e.y);
         if (tile.visible) {
-            var bg = .{.r=tile.light.bg.r,.g=tile.light.bg.g,.b=tile.light.bg.b};
+            const bg = .{.r=tile.light.bg.r,.g=tile.light.bg.g,.b=tile.light.bg.b};
             tcod.consolePutCharEx(console, e.x, e.y, e.glyph, e.color, bg);
         }
     }

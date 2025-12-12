@@ -27,7 +27,7 @@ pub const Engine = struct {
     pub fn handleEnemyTurns(self: *Engine) void {
         for (self.map.entities.items) |e| {
             if (e != self.player) {
-                std.debug.print("{} wonders when it will get a real turn.\n", .{e.name});
+                std.debug.print("{s} wonders when it will get a real turn.\n", .{e.name});
             }
         }
     }

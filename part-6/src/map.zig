@@ -45,12 +45,12 @@ pub const Map = struct {
     allocator: Allocator,
     entities: ArrayList(*Entity),
 
-    pub fn addEntity(self: *Map, entity: *Entity) !void {
-        try self.entities.append(entity);
+    pub fn addEntity(self: *Map, entity: *Entity, allocator: Allocator) !void {
+        try self.entities.append(allocator, entity);
     }
 
     pub fn idx(self: *Map, x: i32, y: i32) usize {
-        return @intCast(usize, self.width * y + x);
+        return @intCast(self.width * y + x);
     }
 
     pub fn inBounds(self: *Map, x: i32, y: i32) bool {
@@ -60,7 +60,7 @@ pub const Map = struct {
     pub fn fill(self: *Map, tileToFill: Tile) void {
         var i: i32 = 0;
         while (i < self.width * self.height) : (i += 1) {
-            self.cells[@intCast(usize,i)] = tileToFill;
+            self.cells[@intCast(i)] = tileToFill;
         }
         tcod.mapClear(self.tcMap, tileToFill.transparent, tileToFill.walkable);
     }
@@ -71,12 +71,12 @@ pub const Map = struct {
         tcod.mapSetProperties(self.tcMap, x, y, tileToSet.transparent, tileToSet.walkable);
     }
 
-    pub fn deinit(self: *Map) void {
+    pub fn deinit(self: *Map, allocate: Allocator) void {
         self.allocator.free(self.cells);
         for (self.entities.items) |e| {
             self.allocator.destroy(e);
         }
-        self.entities.deinit();
+        self.entities.deinit(allocator);
     }
 
     pub fn get(self: *Map, x: i32, y: i32) *Tile {
@@ -111,8 +111,8 @@ pub const Map = struct {
 
     pub fn init(width: i32, height: i32, allocator: Allocator) !Map {
         const size = width * height;
-        var cells = try allocator.alloc(Tile, @intCast(usize, size));
-        var ents = ArrayList(*Entity).init(allocator);
+        const cells = try allocator.alloc(Tile, @intCast(size));
+        const ents: ArrayList(*Entity) = .empty;
         var m = Map{.width=width, .height=height, .allocator=allocator, .cells=cells, .entities=ents};
         m.tcMap = tcod.mapNew(width, height);
         m.fill(WALL);

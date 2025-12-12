@@ -29,7 +29,7 @@ pub fn main() anyerror!void {
     const allocator = gpa.allocator();
     defer {
         const leaked = gpa.deinit();
-        if (leaked) expect(false) catch @panic("FAIL");
+        if (leaked == .leak) expect(false) catch @panic("FAIL");
     }
 
     // Create game structures and the engine
@@ -37,7 +37,7 @@ pub fn main() anyerror!void {
     var map = try procgen.generateDungeon(constants.MAX_ROOMS, constants.ROOM_MIN_SIZE, constants.ROOM_MAX_SIZE, 
         constants.ROOM_MAX_MONSTERS, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT, player, allocator);
     defer {
-        map.deinit();
+        map.deinit(allocator);
     }
     var eng = engine.Engine.init(player, console, &map);
 

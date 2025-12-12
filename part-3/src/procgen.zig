@@ -161,8 +161,8 @@ test "tunnelBetween" {
 }
 
 test "line" {
-    var innerList = ArrayList(Coord).init(std.testing.allocator);
-    defer innerList.deinit();
+    var innerList: ArrayList(Coord) = .empty;
+    defer innerList.deinit(std.testing.allocator);
     try line(.{.x=0,.y=0}, .{.x=2,.y=2}, &innerList);
     try expect(innerList.items.len == 2);
     try expect(std.meta.eql(innerList.items[0], Coord{.x=1,.y=1}));

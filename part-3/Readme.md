@@ -8,13 +8,13 @@ In Zig, to create random integers we need to use the `std.rand` namespace struct
 
 ```zig
 // import
-const RndGen = std.rand.DefaultPrng;
+const RndGen = std.Random.DefaultPrng;
 
 // initialize the randome generator
 var rnd = RndGen.init(0);
 
 // seed the random generator using the current time
-rnd.seed(@intCast(u64, std.time.milliTimestamp()));
+rnd.seed(@intCast(now.timestamp.sec));
 
 // get a random i32 integer between room min and max size (at most means this is inclusive of room max size)
 const roomWidth = rnd.random().intRangeAtMost(i32, room_min_size, room_max_size);
@@ -30,16 +30,16 @@ Here's one example:
 
 ```zig
 pub fn inner(self: RectangularRoom, allocator: Allocator) ![]Coord {
-    var innerList = ArrayList(Coord).init(allocator);
-    defer innerList.deinit();
+    var innerList: ArrayList(Coord) = .empty;
+    defer innerList.deinit(allocator);
     var xi: i32 = self.x1 + 1;
     while (xi < self.x2) : (xi += 1) {
         var yi: i32 = self.y1 + 1;
         while (yi < self.y2) : (yi += 1) {
-            try innerList.append(.{ .x = xi, .y = yi });
+            try innerList.append(allocator, .{ .x = xi, .y = yi });
         }
     }
-    return innerList.toOwnedSlice();
+    return innerList.toOwnedSlice(allocator);
 }
 ```
 
@@ -50,7 +50,7 @@ It's really important to remember to defer the `deinit` call here after creating
 The final call to `toOwnedSlice()` creates a slice pointing to all the elements we created that can be iterated over by the caller of this function. The caller also needs to remember to free the owned slice so we avoid a memory leak! Here's the bit that uses this code:
 
 ```zig
-var roomInner = try room.inner(allocator);
+const roomInner = try room.inner(allocator);
 defer allocator.free(roomInner);
 for (roomInner) |coord| {
     map.set(coord.x, coord.y, models.FLOOR);
@@ -62,7 +62,7 @@ for (roomInner) |coord| {
 The last thing I want to mention here in this summary of part 3 is line creation. The libtcod library has some functionality to create lines of x/y coordinates using the Bresenham algorithm. The C API has a couple different sets of functions to do this and I think I used deprecated functions but either way...
 
 ```zig
-pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord)) !void {
+pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord), allocator: Allocator) !void {
     if (start.eql(end)) {
         // Only seems to happen because a corner wasn't needed
         std.log.info("line: zero length line sequence {} == {}", .{start,end});
@@ -72,9 +72,9 @@ pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord)) !void {
     var y: i32 = undefined;
     tcod.lineInit(start.x, start.y, end.x, end.y);
     _ = tcod.lineStep(&x, &y);
-    try innerList.append(.{ .x = x, .y = y });
+    try innerList.append(allocator, .{ .x = x, .y = y });
     while (!tcod.lineStep(&x, &y)) {
-        try innerList.append(.{ .x = x, .y = y });
+        try innerList.append(allocator, .{ .x = x, .y = y });
     }
 }
 ```
