@@ -96,7 +96,7 @@ fn pathFunction(xFrom: c_int, yFrom: c_int, xTo: c_int, yTo: c_int, userData: ?*
 ...
 
 var ctx = PathContext{.mp=mp, .target=map.Coord{.x=target.x,.y=target.y}};
-var pathToTarget = tcod.pathNewUsingFn(mp.width, mp.height, pathFunction, &ctx);
+const pathToTarget = tcod.pathNewUsingFn(mp.width, mp.height, pathFunction, &ctx);
 defer {
     tcod.pathDelete(pathToTarget);
 }
@@ -175,7 +175,7 @@ Here's a quick sort example I'm using to sort my array of entities by their rend
 pub fn getRenderOrderedEntities(self: *Map) []*Entity {
     var ents = self.entities.clone() catch @panic("failed");
     var entslice = ents.toOwnedSlice();
-    ents.deinit();
+    ents.deinit(self.allocator);
     std.sort.sort(*Entity, entslice, {}, ent.renderOrderComparator);
     return entslice;
 }
@@ -225,7 +225,7 @@ pub fn consolePrint(console: TcodConsole, x: i32, y: i32, fmt: []u8) void {
 
 ...
 
-var msg = std.fmt.allocPrint(m.allocator, "hp: {d}/{d}", 
+const msg = std.fmt.allocPrint(m.allocator, "hp: {d}/{d}", 
     .{player.component.fighter.hp, player.component.fighter.maxHp}) catch @panic("eom");
 tcod.consolePrint(console, 1, 47, msg);
 m.allocator.free(msg);

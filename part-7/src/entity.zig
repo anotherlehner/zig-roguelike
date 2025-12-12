@@ -41,7 +41,7 @@ pub const Entity = struct {
 
 pub fn renderOrderComparator(context: void, a: *Entity, b: *Entity) bool {
     _ = context;
-    return @enumToInt(a.renderOrder) < @enumToInt(b.renderOrder);
+    return @intFromEnum(a.renderOrder) < @intFromEnum(b.renderOrder);
 }
 
 pub const ComponentFighter = struct {
@@ -51,7 +51,7 @@ pub const ComponentFighter = struct {
     power: i32,
 
     pub fn setHp(self: *ComponentFighter, value: i32) void {
-        self.hp = @maximum(0, @minimum(value, self.maxHp));
+        self.hp = @max(0, @min(value, self.maxHp));
     }
 
     pub fn isAlive(self: *ComponentFighter) bool {

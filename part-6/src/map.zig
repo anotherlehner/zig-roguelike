@@ -76,7 +76,7 @@ pub const Map = struct {
         for (self.entities.items) |e| {
             self.allocator.destroy(e);
         }
-        self.entities.deinit(allocator);
+        self.entities.deinit(allocate);
     }
 
     pub fn get(self: *Map, x: i32, y: i32) *Tile {
@@ -120,10 +120,10 @@ pub const Map = struct {
     }
 
     pub fn getRenderOrderedEntities(self: *Map) []*Entity {
-        var ents = self.entities.clone() catch @panic("failed");
-        var entslice = ents.toOwnedSlice();
-        ents.deinit();
-        std.sort.sort(*Entity, entslice, {}, ent.renderOrderComparator);
+        var ents = self.entities.clone(self.allocator) catch @panic("failed");
+        const entslice = ents.toOwnedSlice(self.allocator) catch @panic("failed");
+        ents.deinit(self.allocator);
+        std.sort.insertion(*Entity, entslice, {}, ent.renderOrderComparator);
         return entslice;
     }
 };

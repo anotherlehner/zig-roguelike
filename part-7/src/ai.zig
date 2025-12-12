@@ -46,15 +46,15 @@ const AIHostileEnemy = struct {
     pub fn act(self: AIHostileEnemy, eng: *engine.Engine, source: *ent.Entity, 
             target: *ent.Entity, mp: *map.Map) void {
         _ = self;
-        var absDx = math.absInt(target.x - source.x) catch unreachable;
-        var absDy = math.absInt(target.y - source.y) catch unreachable;
-        var distance = @maximum(absDx, absDy);
+        const absDx = @abs(target.x - source.x);
+        const absDy = @abs(target.y - source.y);
+        const distance = @max(absDx, absDy);
         if (mp.isInFov(source.x, source.y)) {
             if (distance <= 1) {
                 action.performMeleeAction(eng, source, target);
             } else {
                 var ctx = PathContext{.mp=mp, .target=map.Coord{.x=target.x,.y=target.y}};
-                var pathToTarget = tcod.pathNewUsingFn(mp.width, mp.height, pathFunction, &ctx);
+                const pathToTarget = tcod.pathNewUsingFn(mp.width, mp.height, pathFunction, &ctx);
                 defer {
                     tcod.pathDelete(pathToTarget);
                 }

@@ -65,9 +65,9 @@ pub fn placeEntities(room: *RectangularRoom, m: *Map, maxMonsters: i32, allocato
         const y: i32 = rnd.random().intRangeAtMost(i32, room.y1+1, room.y2-1);
         const monsterType = rnd.random().intRangeAtMost(i32, 1, 10);
         if (monsterType < 8) {
-            try m.addEntity(try ent.orc(x,y, allocator));
+            try m.addEntity(try ent.orc(x,y, allocator), allocator);
         } else {
-            try m.addEntity(try ent.troll(x,y, allocator));
+            try m.addEntity(try ent.troll(x,y, allocator), allocator);
         }
         i += 1;
     }
@@ -115,7 +115,7 @@ pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord), allocator: A
 
 pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32, room_max_monsters: i32, width: i32, height: i32, player: *Entity, allocator: Allocator) !Map {
     var m = try Map.init(width, height, allocator);
-    try m.entities.append(player);
+    try m.entities.append(allocator, player);
 
     var rooms = try allocator.alloc(RectangularRoom, max_rooms);
     defer allocator.free(rooms);

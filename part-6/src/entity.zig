@@ -27,7 +27,7 @@ pub const Entity = struct {
     name: []const u8 = "Unnamed",
     blocksMovement: bool = false,
     // components: []ComponentType = undefined, TODO
-    component: ComponentType = null,
+    component: ComponentType = undefined,
     ai: ?ai.AIType = null, // optional ai
     isPlayer: bool = false,
     renderOrder: RenderOrder = RenderOrder.corpse,
@@ -40,7 +40,7 @@ pub const Entity = struct {
 
 pub fn renderOrderComparator(context: void, a: *Entity, b: *Entity) bool {
     _ = context;
-    return @enumToInt(a.renderOrder) < @enumToInt(b.renderOrder);
+    return @intFromEnum(a.renderOrder) < @intFromEnum(b.renderOrder);
 }
 
 pub const ComponentFighter = struct {
@@ -62,7 +62,7 @@ pub fn die(e: *Entity) void {
     if (e.isPlayer) {
         std.debug.print("You died!\n", .{});
     } else {
-        std.debug.print("{} died!\n", .{e.name});
+        std.debug.print("{s} died!\n", .{e.name});
     }
 
     e.glyph = '%';

@@ -115,7 +115,7 @@ pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord), allocator: A
 
 pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32, room_max_monsters: i32, width: i32, height: i32, maxHeight: i32, player: *Entity, allocator: Allocator) !Map {
     var m = try Map.init(width, height, allocator);
-    try m.entities.append(player);
+    try m.entities.append(allocator, player);
 
     var rooms = try allocator.alloc(RectangularRoom, max_rooms);
     defer allocator.free(rooms);

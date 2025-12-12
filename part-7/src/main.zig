@@ -20,7 +20,7 @@ test {
 
 pub fn main() anyerror!void {
     // Create the libtcod console
-    var console = tcod.init();
+    const console = tcod.init();
     tcod.setFps(20);
     defer {
         tcod.quit();
@@ -35,7 +35,7 @@ pub fn main() anyerror!void {
     }
 
     // Create game structures and the engine
-    var player = try ent.player(0, 0, allocator);
+    const player = try ent.player(0, 0, allocator);
     var map = try procgen.generateDungeon(constants.MAX_ROOMS, constants.ROOM_MIN_SIZE, 
         constants.ROOM_MAX_SIZE, constants.ROOM_MAX_MONSTERS, constants.SCREEN_WIDTH, 
         constants.SCREEN_HEIGHT, constants.SCREEN_HEIGHT-5, player, allocator);

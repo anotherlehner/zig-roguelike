@@ -28,10 +28,11 @@ const PathContext = struct {
 
 /// C callback function for pathfinding
 fn pathFunction(xFrom: c_int, yFrom: c_int, xTo: c_int, yTo: c_int, userData: ?*anyopaque) callconv(.C) f32 {
-    var ctx = @ptrCast(*PathContext, @alignCast(@alignOf(*PathContext), userData.?));
+    // var ctx = @ptrCast(*PathContext, @alignCast(@alignOf(*PathContext), userData));
+    var ctx = userData;
     _ = xFrom;
     _ = yFrom;
-    var isTarget = ctx.target.x == xTo and ctx.target.y == yTo;
+    const isTarget = ctx.target.x == xTo and ctx.target.y == yTo;
     if (!isTarget and (!ctx.mp.isWalkable(xTo, yTo) or ctx.mp.isBlocked(xTo, yTo))) {
         // the way is blocked and have not reached target
         return 0.0;
@@ -45,15 +46,15 @@ const AIHostileEnemy = struct {
     pub fn act(self: AIHostileEnemy, source: *ent.Entity, 
             target: *ent.Entity, mp: *map.Map) void {
         _ = self;
-        var absDx = math.absInt(target.x - source.x) catch unreachable;
-        var absDy = math.absInt(target.y - source.y) catch unreachable;
-        var distance = @maximum(absDx, absDy);
+        const absDx = @abs(target.x - source.x);
+        const absDy = @abs(target.y - source.y);
+        const distance = @max(absDx, absDy);
         if (mp.isInFov(source.x, source.y)) {
             if (distance <= 1) {
                 action.performMeleeAction(source, target);
             } else {
                 var ctx = PathContext{.mp=mp, .target=map.Coord{.x=target.x,.y=target.y}};
-                var pathToTarget = tcod.pathNewUsingFn(mp.width, mp.height, pathFunction, &ctx);
+                const pathToTarget = tcod.pathNewUsingFn(mp.width, mp.height, pathFunction, &ctx);
                 defer {
                     tcod.pathDelete(pathToTarget);
                 }

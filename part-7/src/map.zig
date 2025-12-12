@@ -137,7 +137,7 @@ pub const Map = struct {
     pub fn getRenderOrderedEntities(self: *Map) []*Entity {
         var ents = self.entities.clone() catch @panic("failed");
         var entslice = ents.toOwnedSlice();
-        ents.deinit();
+        ents.deinit(self.allocator);
         std.sort.sort(*Entity, entslice, {}, ent.renderOrderComparator);
         return entslice;
     }
