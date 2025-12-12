@@ -10,8 +10,7 @@ pub fn render(console: tcod.TcodConsole, m: *map.Map, player: *ent.Entity) void 
     tcod.consoleClear(console);
     renderMap(console, m);
 
-    const msg = std.fmt.allocPrint(m.allocator, "hp: {d}/{d}", 
-        .{player.component.fighter.hp, player.component.fighter.maxHp}) catch @panic("eom");
+    const msg = std.fmt.allocPrint(m.allocator, "hp: {d}/{d}", .{ player.component.fighter.hp, player.component.fighter.maxHp }) catch @panic("eom");
     tcod.consolePrint(console, 1, 47, msg);
     m.allocator.free(msg);
 
@@ -45,7 +44,7 @@ fn renderMap(console: tcod.TcodConsole, m: *map.Map) void {
         }
 
         x += 1;
-        if (@mod(x,m.width) == 0) {
+        if (@mod(x, m.width) == 0) {
             y += 1;
             x = 0;
         }
@@ -54,9 +53,9 @@ fn renderMap(console: tcod.TcodConsole, m: *map.Map) void {
     const orderedEntities = m.getRenderOrderedEntities();
 
     for (orderedEntities) |e| {
-        var tile = m.get(e.x,e.y);
+        const tile = m.get(e.x, e.y);
         if (tile.visible) {
-            const bg = tcod.TcodColorRGB{.r=tile.light.bg.r,.g=tile.light.bg.g,.b=tile.light.bg.b};
+            const bg = tcod.TcodColorRGB{ .r = tile.light.bg.r, .g = tile.light.bg.g, .b = tile.light.bg.b };
             tcod.consolePutCharEx(console, e.x, e.y, e.glyph, e.color, bg);
         }
     }

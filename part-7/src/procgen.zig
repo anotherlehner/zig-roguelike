@@ -61,13 +61,13 @@ pub fn placeEntities(room: *RectangularRoom, m: *Map, maxMonsters: i32, allocato
     const nMonsters = rnd.random().intRangeAtMost(i32, 0, maxMonsters);
     var i: usize = 0;
     while (i < nMonsters) {
-        const x: i32 = rnd.random().intRangeAtMost(i32, room.x1+1, room.x2-1);
-        const y: i32 = rnd.random().intRangeAtMost(i32, room.y1+1, room.y2-1);
+        const x: i32 = rnd.random().intRangeAtMost(i32, room.x1 + 1, room.x2 - 1);
+        const y: i32 = rnd.random().intRangeAtMost(i32, room.y1 + 1, room.y2 - 1);
         const monsterType = rnd.random().intRangeAtMost(i32, 1, 10);
         if (monsterType < 8) {
-            try m.addEntity(try ent.orc(x,y, allocator));
+            try m.addEntity(try ent.orc(x, y, allocator));
         } else {
-            try m.addEntity(try ent.troll(x,y, allocator));
+            try m.addEntity(try ent.troll(x, y, allocator));
         }
         i += 1;
     }
@@ -91,8 +91,8 @@ pub fn tunnelBetween(start: Coord, end: Coord, allocator: Allocator) ![]Coord {
         cornerY = end.y;
     }
 
-    try line(start, .{.x=cornerX,.y=cornerY}, &innerList, allocator);
-    try line(.{.x=cornerX,.y=cornerY}, end, &innerList, allocator);
+    try line(start, .{ .x = cornerX, .y = cornerY }, &innerList, allocator);
+    try line(.{ .x = cornerX, .y = cornerY }, end, &innerList, allocator);
 
     return innerList.toOwnedSlice(allocator);
 }
@@ -119,7 +119,7 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
 
     var rooms = try allocator.alloc(RectangularRoom, max_rooms);
     defer allocator.free(rooms);
-    
+
     var rnd = RndGen.init(0);
     const now = try std.time.Instant.now();
     rnd.seed(@intCast(now.timestamp.sec));
@@ -132,7 +132,7 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
         const x = rnd.random().intRangeAtMost(i32, 0, width - roomWidth - 1);
         const y = rnd.random().intRangeAtMost(i32, 0, maxHeight - roomHeight - 1);
 
-        var room = RectangularRoom.init(x,y,roomWidth, roomHeight);
+        var room = RectangularRoom.init(x, y, roomWidth, roomHeight);
 
         // intersections
         var j: usize = 0;
@@ -154,7 +154,7 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
                 player.x = center.x;
                 player.y = center.y;
             } else {
-                const tunnelCoords: []Coord = try tunnelBetween(rooms[i-1].center(), room.center(), allocator);
+                const tunnelCoords: []Coord = try tunnelBetween(rooms[i - 1].center(), room.center(), allocator);
                 defer allocator.free(tunnelCoords);
                 for (tunnelCoords) |c| {
                     m.set(c.x, c.y, map.FLOOR);
@@ -172,24 +172,24 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
 }
 
 test "tunnelBetween" {
-    var t = try tunnelBetween(.{.x=0,.y=0}, .{.x=5,.y=5}, std.testing.allocator);
+    const t = try tunnelBetween(.{ .x = 0, .y = 0 }, .{ .x = 5, .y = 5 }, std.testing.allocator);
     defer std.testing.allocator.free(t);
     try expect(t.len == 10);
-    try expect(std.meta.eql(t[4], .{.x=0,.y=5}) or std.meta.eql(t[4], .{.x=5,.y=0}));
+    try expect(std.meta.eql(t[4], .{ .x = 0, .y = 5 }) or std.meta.eql(t[4], .{ .x = 5, .y = 0 }));
 }
 
 test "line" {
     var innerList: ArrayList(Coord) = .empty;
     defer innerList.deinit(std.testing.allocator);
-    try line(.{.x=0,.y=0}, .{.x=2,.y=2}, &innerList);
+    try line(.{ .x = 0, .y = 0 }, .{ .x = 2, .y = 2 }, &innerList);
     try expect(innerList.items.len == 2);
-    try expect(std.meta.eql(innerList.items[0], Coord{.x=1,.y=1}));
-    try expect(std.meta.eql(innerList.items[1], Coord{.x=2,.y=2}));
+    try expect(std.meta.eql(innerList.items[0], Coord{ .x = 1, .y = 1 }));
+    try expect(std.meta.eql(innerList.items[1], Coord{ .x = 2, .y = 2 }));
 }
 
 test "rectangularroom.intersects true" {
     const r1 = RectangularRoom.init(3, 3, 5, 5);
-    const r2 = RectangularRoom.init(1,1, 5, 5);
+    const r2 = RectangularRoom.init(1, 1, 5, 5);
     try expect(r1.intersects(r2) == true);
 }
 
@@ -216,7 +216,7 @@ test "rectangularroom.center" {
 
 test "rectangularroom.inner" {
     const rr = RectangularRoom.init(1, 1, 3, 3);
-    var inner = try rr.inner(std.testing.allocator);
+    const inner = try rr.inner(std.testing.allocator);
     defer std.testing.allocator.free(inner);
     try expect(std.meta.eql(inner[0], Coord{ .x = 2, .y = 2 }));
     try expect(std.meta.eql(inner[1], Coord{ .x = 2, .y = 3 }));

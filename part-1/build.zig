@@ -5,17 +5,24 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // Application exe
-    const exe = b.addExecutable(.{ 
-        .name = "zrl", 
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize
-        })
-    });
+    const exe = b.addExecutable(.{ .name = "zrl", .root_module = b.createModule(.{ .root_source_file = b.path("src/main.zig"), .target = target, .optimize = optimize }) });
     exe.linkLibC();
-    exe.linkSystemLibrary("libtcod");
     b.installArtifact(exe);
+
+    // Check if TARGET is macOS
+    if (target.result.os.tag == .macos) {
+        exe.linkSystemLibrary("tcod");
+
+        // specific to Apple Silicon (M1/M2/M3)
+        exe.addIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
+        exe.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
+
+        // Optional: Support Intel Macs too (they use /usr/local)
+        exe.addIncludePath(.{ .cwd_relative = "/usr/local/include" });
+        exe.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
+    } else {
+        exe.linkSystemLibrary("libtcod");
+    }
 
     // Set up the `zig build run` command to execute the app
     const run_cmd = b.addRunArtifact(exe);

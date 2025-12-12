@@ -9,8 +9,7 @@ const messagelog = @import("messagelog.zig");
 const Allocator = std.mem.Allocator;
 const MessageLog = messagelog.MessageLog;
 
-pub fn render(console: tcod.TcodConsole, m: *map.Map, player: *ent.Entity, log: *MessageLog,
-        mx: i32, my: i32) void {
+pub fn render(console: tcod.TcodConsole, m: *map.Map, player: *ent.Entity, log: *MessageLog, mx: i32, my: i32) void {
     tcod.consoleClear(console);
     renderMap(console, m);
     renderBar(console, player.component.fighter.hp, player.component.fighter.maxHp, 20, m.allocator);
@@ -21,27 +20,26 @@ pub fn render(console: tcod.TcodConsole, m: *map.Map, player: *ent.Entity, log: 
 }
 
 fn renderExamine(console: tcod.TcodConsole, m: *map.Map, mx: i32, my: i32) void {
-    if (!m.isInFov(mx,my)) return;
-    var exText = m.examine(mx,my);
+    if (!m.isInFov(mx, my)) return;
+    var exText = m.examine(mx, my);
     tcod.consolePrintFgMaxLength(console, 0, 46, exText, color.White_rgb, 20);
     m.allocator.free(exText);
 }
 
 fn renderMessages(console: tcod.TcodConsole, x: i32, y: i32, width: i32, height: i32, log: *messagelog.MessageLog) void {
     var y_offset: i32 = y;
-    var yi = @intCast(i64, log.messages.items.len)-1;
+    var yi = @intCast(i64, log.messages.items.len) - 1;
     var nRendered: i32 = 0;
     while (yi >= 0 and nRendered < height) : (yi -= 1) {
         var msg = &log.messages.items[@intCast(usize, yi)];
         if (msg.count > 1) {
-            var fullMsg = std.fmt.allocPrint(log.allocator, "{} (x{d})",
-                .{msg.text, msg.count}) catch @panic("eom");
+            var fullMsg = std.fmt.allocPrint(log.allocator, "{} (x{d})", .{ msg.text, msg.count }) catch @panic("eom");
             tcod.consolePrintFgMaxLength(console, x, y_offset, fullMsg, msg.fg, width);
             log.allocator.free(fullMsg);
         } else {
             tcod.consolePrintFgMaxLength(console, x, y_offset, msg.text, msg.fg, width);
         }
-        
+
         nRendered += 1;
         y_offset += 1;
     }
@@ -56,8 +54,7 @@ fn renderBar(console: tcod.TcodConsole, curValue: i32, maxValue: i32, totWidth: 
         tcod.consoleDrawRectRgb(console, 0, 45, barWidth, 1, 1, color.Bar_filled, color.Bar_filled);
     }
 
-    var msg = std.fmt.allocPrint(allocator, "hp: {d}/{d}", 
-        .{curValue, maxValue}) catch @panic("eom");
+    var msg = std.fmt.allocPrint(allocator, "hp: {d}/{d}", .{ curValue, maxValue }) catch @panic("eom");
     tcod.consolePrintFg(console, 1, 45, msg, color.White_rgb);
     allocator.free(msg);
 }
@@ -93,7 +90,7 @@ fn renderMap(console: tcod.TcodConsole, m: *map.Map) void {
         // Why would not writing default black tiles here break the other functions?
 
         x += 1;
-        if (@mod(x,m.width) == 0) {
+        if (@mod(x, m.width) == 0) {
             y += 1;
             x = 0;
         }
@@ -102,9 +99,9 @@ fn renderMap(console: tcod.TcodConsole, m: *map.Map) void {
     const orderedEntities = m.getRenderOrderedEntities();
 
     for (orderedEntities) |e| {
-        var tile = m.get(e.x,e.y);
+        const tile = m.get(e.x, e.y);
         if (tile.visible) {
-            const bg = tcod.TcodColorRGB{.r=tile.light.bg.r,.g=tile.light.bg.g,.b=tile.light.bg.b};
+            const bg = tcod.TcodColorRGB{ .r = tile.light.bg.r, .g = tile.light.bg.g, .b = tile.light.bg.b };
             tcod.consolePutCharEx(console, e.x, e.y, e.glyph, e.color, bg);
         }
     }

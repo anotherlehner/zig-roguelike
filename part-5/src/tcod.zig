@@ -50,7 +50,7 @@ pub fn consoleClear(con: TcodConsole) void {
 }
 
 pub fn consoleBlit(con: TcodConsole, width: i32, height: i32) void {
-    c.TCOD_console_blit(con,0,0,width,height,null,0,0,1.0,1.0);
+    c.TCOD_console_blit(con, 0, 0, width, height, null, 0, 0, 1.0, 1.0);
 }
 
 pub fn sysCheckForEvent(key: *TcodKey) void {
@@ -87,16 +87,16 @@ pub fn renderMap(console: TcodConsole, map: *models.Map) void {
         }
 
         x += 1;
-        if (@mod(x,map.width) == 0) {
+        if (@mod(x, map.width) == 0) {
             y += 1;
             x = 0;
         }
     }
 
     for (map.entities.items) |ent| {
-        var tile = map.get(ent.x,ent.y);
+        const tile = map.get(ent.x, ent.y);
         if (tile.visible) {
-            const bg = TcodColorRGB{.r=tile.light.bg.r,.g=tile.light.bg.g,.b=tile.light.bg.b};
+            const bg = TcodColorRGB{ .r = tile.light.bg.r, .g = tile.light.bg.g, .b = tile.light.bg.b };
             consolePutCharEx(console, ent.x, ent.y, ent.glyph, ent.color, bg);
         }
     }
@@ -107,7 +107,7 @@ pub fn lineInit(xFrom: i32, yFrom: i32, xTo: i32, yTo: i32) void {
 }
 
 pub fn lineStep(x: *i32, y: *i32) bool {
-    return c.TCOD_line_step(x,y);
+    return c.TCOD_line_step(x, y);
 }
 
 pub fn mapNew(width: i32, height: i32) TcodMap {
