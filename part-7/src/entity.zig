@@ -65,7 +65,7 @@ pub fn die(eng: *engine.Engine, e: *Entity) void {
             .{}) catch @panic("eom");
         eng.log.addMessage(msg, color.Player_die, true);
     } else {
-        var msg = std.fmt.allocPrint(eng.allocator, "{s} died.", 
+        var msg = std.fmt.allocPrint(eng.allocator, "{} died.", 
             .{e.name}) catch @panic("eom");
         eng.log.addMessage(msg, color.Enemy_die, true);
     }

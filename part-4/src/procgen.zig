@@ -84,7 +84,7 @@ pub fn tunnelBetween(start: Coord, end: Coord, allocator: Allocator) ![]Coord {
 pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord)) !void {
     if (start.eql(end)) {
         // Only seems to happen because a corner wasn't needed
-        // std.log.info("line: zero length line sequence {s} == {s}", .{start,end});
+        // std.log.info("line: zero length line sequence {} == {}", .{start,end});
         return;
     }
     var x: i32 = undefined;

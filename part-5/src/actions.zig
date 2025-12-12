@@ -36,5 +36,5 @@ fn performMoveAction(map: *mdl.Map, player: *mdl.Entity, nx: i32, ny: i32) void 
 fn performMeleeAction(map: *mdl.Map, player: *mdl.Entity, target: *mdl.Entity) void {
     _ = player;
     _ = map;
-    std.debug.print("You kick {s}\n", .{target.name});
+    std.debug.print("You kick {}\n", .{target.name});
 }

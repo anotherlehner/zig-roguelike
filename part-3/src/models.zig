@@ -67,7 +67,7 @@ pub const Map = struct {
     tiles: []Tile, // width * height
 
     pub fn idx(self: *Map, x: i32, y: i32) usize {
-        return @intCast(usize, self.width * y + x);
+        return @intCast(self.width * y + x);
     }
 
     pub fn inBounds(self: *Map, x: i32, y: i32) bool {
@@ -77,7 +77,7 @@ pub const Map = struct {
     pub fn fill(self: *Map, tileToFill: Tile) void {
         var i: i32 = 0;
         while (i < self.width * self.height) : (i += 1) {
-            self.tiles[@intCast(usize,i)] = tileToFill;
+            self.tiles[@intCast(i)] = tileToFill;
         }
     }
 
@@ -102,7 +102,7 @@ pub const Map = struct {
 
     pub fn init(width: i32, height: i32, allocator: Allocator) !Map {
         const size = width * height;
-        var tiles = try allocator.alloc(Tile, @intCast(usize, size));
+        const tiles = try allocator.alloc(Tile, @intCast(size));
         var m = Map{.width=width, .height=height, .allocator=allocator, .tiles=tiles};
         m.fill(WALL);
         return m;

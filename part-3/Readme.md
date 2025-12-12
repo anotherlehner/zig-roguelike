@@ -65,7 +65,7 @@ The last thing I want to mention here in this summary of part 3 is line creation
 pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord)) !void {
     if (start.eql(end)) {
         // Only seems to happen because a corner wasn't needed
-        std.log.info("line: zero length line sequence {s} == {s}", .{start,end});
+        std.log.info("line: zero length line sequence {} == {}", .{start,end});
         return;
     }
     var x: i32 = undefined;

@@ -63,10 +63,10 @@ const c = @cImport({
 To make sure things were working right I also grabbed a constant from inside the libtcod C header and tried printing it out in the Zig log statement:
 
 ```zig
-std.log.info("tcod red: {s}", .{c.TCOD_red});
+std.log.info("tcod red: {}", .{c.TCOD_red});
 ```
 
-`{s}` means print the value as a string.
+`{}` means print the value as a string.
 
 ## Building and running
 

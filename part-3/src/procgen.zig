@@ -3,7 +3,7 @@
 const std = @import("std");
 const models = @import("models.zig");
 const tcod = @import("tcod.zig");
-const RndGen = std.rand.DefaultPrng;
+const RndGen = std.Random.DefaultPrng;
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 const expect = std.testing.expect;
@@ -31,20 +31,20 @@ pub const RectangularRoom = struct {
     }
 
     pub fn inner(self: RectangularRoom, allocator: Allocator) ![]Coord {
-        var innerList = ArrayList(Coord).init(allocator);
-        defer innerList.deinit();
+        var innerList: ArrayList(Coord) = .empty;
+        defer innerList.deinit(allocator);
         var xi: i32 = self.x1 + 1;
         while (xi < self.x2) : (xi += 1) {
             var yi: i32 = self.y1 + 1;
             while (yi < self.y2) : (yi += 1) {
-                try innerList.append(.{ .x = xi, .y = yi });
+                try innerList.append(allocator, .{ .x = xi, .y = yi });
             }
         }
-        return innerList.toOwnedSlice();
+        return innerList.toOwnedSlice(allocator);
     }
 
     pub fn init(x: i32, y: i32, width: i32, height: i32) RectangularRoom {
-        var r = RectangularRoom{
+        const r = RectangularRoom{
             .x1 = x,
             .y1 = y,
             .x2 = width + x,
@@ -59,11 +59,12 @@ pub const RectangularRoom = struct {
 };
 
 pub fn tunnelBetween(start: Coord, end: Coord, allocator: Allocator) ![]Coord {
+    const now = try std.time.Instant.now();
     var rnd = RndGen.init(0);
-    rnd.seed(@intCast(u64, std.time.milliTimestamp()));
+    rnd.seed(@intCast(now.timestamp.sec));
 
-    var innerList = ArrayList(Coord).init(allocator);
-    defer innerList.deinit();
+    var innerList: ArrayList(Coord) = .empty;
+    defer innerList.deinit(allocator);
 
     var cornerX: i32 = undefined;
     var cornerY: i32 = undefined;
@@ -75,25 +76,25 @@ pub fn tunnelBetween(start: Coord, end: Coord, allocator: Allocator) ![]Coord {
         cornerY = end.y;
     }
 
-    try line(start, .{.x=cornerX,.y=cornerY}, &innerList);
-    try line(.{.x=cornerX,.y=cornerY}, end, &innerList);
+    try line(start, .{.x=cornerX,.y=cornerY}, &innerList, allocator);
+    try line(.{.x=cornerX,.y=cornerY}, end, &innerList, allocator);
 
-    return innerList.toOwnedSlice();
+    return innerList.toOwnedSlice(allocator);
 }
 
-pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord)) !void {
+pub fn line(start: Coord, end: Coord, innerList: *ArrayList(Coord), allocator: Allocator) !void {
     if (start.eql(end)) {
         // Only seems to happen because a corner wasn't needed
-        std.log.info("line: zero length line sequence {s} == {s}", .{start,end});
+        std.log.info("line: zero length line sequence {} == {}", .{start,end});
         return;
     }
     var x: i32 = undefined;
     var y: i32 = undefined;
     tcod.lineInit(start.x, start.y, end.x, end.y);
     _ = tcod.lineStep(&x, &y);
-    try innerList.append(.{ .x = x, .y = y });
+    try innerList.append(allocator, .{ .x = x, .y = y });
     while (!tcod.lineStep(&x, &y)) {
-        try innerList.append(.{ .x = x, .y = y });
+        try innerList.append(allocator, .{ .x = x, .y = y });
     }
 }
 
@@ -103,8 +104,9 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
     var rooms = try allocator.alloc(RectangularRoom, max_rooms);
     defer allocator.free(rooms);
     
+    const now = try std.time.Instant.now();
     var rnd = RndGen.init(0);
-    rnd.seed(@intCast(u64, std.time.milliTimestamp()));
+    rnd.seed(@intCast(now.timestamp.sec));
 
     var i: usize = 0;
     while (i < max_rooms) {
@@ -125,7 +127,7 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
 
         if (!interscts) {
             // carve out the room insides
-            var roomInner = try room.inner(allocator);
+            const roomInner = try room.inner(allocator);
             defer allocator.free(roomInner);
             for (roomInner) |coord| {
                 map.set(coord.x, coord.y, models.FLOOR);
@@ -136,7 +138,7 @@ pub fn generateDungeon(max_rooms: usize, room_min_size: i32, room_max_size: i32,
                 player.x = center.x;
                 player.y = center.y;
             } else {
-                var tunnelCoords: []Coord = try tunnelBetween(rooms[i-1].center(), room.center(), allocator);
+                const tunnelCoords: []Coord = try tunnelBetween(rooms[i-1].center(), room.center(), allocator);
                 defer allocator.free(tunnelCoords);
                 for (tunnelCoords) |c| {
                     map.set(c.x, c.y, models.FLOOR);

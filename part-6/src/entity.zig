@@ -62,14 +62,14 @@ pub fn die(e: *Entity) void {
     if (e.isPlayer) {
         std.debug.print("You died!\n", .{});
     } else {
-        std.debug.print("{s} died!\n", .{e.name});
+        std.debug.print("{} died!\n", .{e.name});
     }
 
     e.glyph = '%';
     e.color = color.rgb(191, 0, 0);
     e.blocksMovement = false;
     e.ai = null;
-    e.name = "{s}'s remains";
+    e.name = "{}'s remains";
     e.renderOrder = RenderOrder.corpse;
 }
 

@@ -70,7 +70,7 @@ pub fn performMeleeAction(eng: *engine.Engine, source: *Entity, target: *Entity)
     var damage = source.component.fighter.power - target.component.fighter.defense;
     var attackColor = if(source.isPlayer) color.Player_atk else color.Enemy_atk;
     if (damage > 0) {
-        var msg = std.fmt.allocPrint(eng.allocator, "{s} attacks {s} for {d} damage", 
+        var msg = std.fmt.allocPrint(eng.allocator, "{} attacks {} for {d} damage", 
             .{source.name, target.name, damage}) catch @panic("eom");
         eng.log.addMessage(msg, attackColor, true);
         target.component.fighter.setHp(target.component.fighter.hp-damage);
@@ -78,7 +78,7 @@ pub fn performMeleeAction(eng: *engine.Engine, source: *Entity, target: *Entity)
             ent.die(eng, target);
         }
     } else {
-        var msg = std.fmt.allocPrint(eng.allocator, "{s} attacks {s} but does no damage", 
+        var msg = std.fmt.allocPrint(eng.allocator, "{} attacks {} but does no damage", 
             .{source.name, target.name}) catch @panic("eom");
         eng.log.addMessage(msg, attackColor, true);
     }

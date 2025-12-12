@@ -68,7 +68,7 @@ pub fn performMoveAction(m: *Map, entity: *Entity, nx: i32, ny: i32) void {
 pub fn performMeleeAction(source: *Entity, target: *Entity) void {
     var damage = source.component.fighter.power - target.component.fighter.defense;
     if (damage > 0) {
-        std.debug.print("{s} attacks {s} for {d} damage.\n", .{
+        std.debug.print("{} attacks {} for {d} damage.\n", .{
             source.name, target.name, damage
         });
         target.component.fighter.setHp(target.component.fighter.hp-damage);
@@ -76,7 +76,7 @@ pub fn performMeleeAction(source: *Entity, target: *Entity) void {
             ent.die(target);
         }
     } else {
-        std.debug.print("{s} attacks {s} but does no damage.\n", .{
+        std.debug.print("{} attacks {} but does no damage.\n", .{
             source.name, target.name
         });
     }

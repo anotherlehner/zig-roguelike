@@ -34,7 +34,7 @@ fn renderMessages(console: tcod.TcodConsole, x: i32, y: i32, width: i32, height:
     while (yi >= 0 and nRendered < height) : (yi -= 1) {
         var msg = &log.messages.items[@intCast(usize, yi)];
         if (msg.count > 1) {
-            var fullMsg = std.fmt.allocPrint(log.allocator, "{s} (x{d})",
+            var fullMsg = std.fmt.allocPrint(log.allocator, "{} (x{d})",
                 .{msg.text, msg.count}) catch @panic("eom");
             tcod.consolePrintFgMaxLength(console, x, y_offset, fullMsg, msg.fg, width);
             log.allocator.free(fullMsg);

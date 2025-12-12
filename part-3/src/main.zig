@@ -23,7 +23,7 @@ pub fn main() anyerror!void {
     }
     tcod.consoleSetCustomFont("../dejavu10x10_gs_tc.png");
 
-    var console = tcod.consoleNew(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT);
+    const console = tcod.consoleNew(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT);
 
     var player = models.Entity{ .x = constants.SCREEN_WIDTH / 2, .y = constants.SCREEN_HEIGHT / 2, .glyph = constants.ASCII_AT, .color = tcod.TcodColorRGB{ .r = 255, .g = 255, .b = 255 } };
 
@@ -35,7 +35,7 @@ pub fn main() anyerror!void {
     const allocator = gpa.allocator();
     defer {
         const leaked = gpa.deinit();
-        if (leaked) expect(false) catch @panic("FAIL");
+        if (leaked == .leak) expect(false) catch @panic("FAIL");
     }
 
     var map = try procgen.generateDungeon(constants.MAX_ROOMS, constants.ROOM_MIN_SIZE, constants.ROOM_MAX_SIZE, 
