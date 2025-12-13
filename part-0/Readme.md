@@ -1,12 +1,12 @@
-By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
-
 # Part 0: Setting Up
+
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
 
 ## Install Zig
 
 Download Zig from the ziglang homepage: https://ziglang.org/download/
 
-I downloaded and installed the latest master version (zig-0.10.0-dev) and stuck that into a local folder, which I then added to my path.
+The code in this repository was last built and tested with Zig 0.15.2.
 
 ## Create the project
 
@@ -22,6 +22,8 @@ This generates a `build.zig` file and `src` folder containing a single `main.zig
 
 ## System-based configuration
 
+### Linux 
+
 Since I wanted to make this as easy on myself as possible I decided to see if I could use libtcod from zig installed as a system dev package. I'm on PopOS so I did a quick apt search and found that indeed a slightly older version of libtcod is available!
 
 ```
@@ -33,25 +35,39 @@ For me this installed libtcod (and headers) for version 1.18.1. About a year old
 
 I'm going to be using the libtcod C API and use some previous years roguelike tutorial attempts in C and the `samples_c.c` that comes with the libtcod source for guidance, among other things. I'll try to note links in each part to websites I used to gain information.
 
-## Vcpkg configuration
+### Mac OS
 
-TODO
+The easiest way to get libtcod working on OSX is to use brew to install it:
 
-Attempt to compile and link against libtcod installed with the vcpkg tool described in the libtcod documentation.
+```
+brew install libtcod
+```
 
-## From-source configuration
+This puts the includes in `/opt/homebrew/include/libtcod`.
 
-TODO
-
-Attempt to compile and link against libtcod installed directly from source built locally.
+NOTE: The name of the library on OSX is `tcod`, not `libtcod`, which confused me at first. I tried a build and saw it failed looking for `liblibtcod`. Once I updated my `build.zig` with an alternate name when being built on macos things worked as expected.
 
 ## Configuring Zig to build using libtcod
 
-To get Zig to compile and link with libtcod we need to make a couple of changes to the `build.zig` file. Between `exe.setBuildMode` and `exe.install` I added a couple lines to tell I want to link with libc and libtcod:
+To get Zig to compile and link with libtcod we need to make a couple of changes to the `build.zig` file. Between `exe.setBuildMode` and `exe.install` I added a some lines to tell I want to link with libc and libtcod:
 
 ```zig
 exe.linkLibC();
-exe.linkSystemLibrary("libtcod");
+b.installArtifact(exe);
+
+// Check if TARGET is macOS
+if (target.result.os.tag == .macos) {
+    exe.linkSystemLibrary("tcod"); // Different name on macos
+
+    // Apple silicon
+    exe.addIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
+    exe.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
+
+    // There may be a slightly different path/setup for intel macs? I'm 
+    // unable to verify this
+} else {
+    exe.linkSystemLibrary("libtcod"); // Familiar linux name
+}
 ```
 
 The other thing we need to do is import the C header in the `main.zig` source file itself. This tells Zig to import that header and make the C code available for us to call:
@@ -77,48 +93,66 @@ To build and run the project Zig provides several commands but for now let's sta
 We get the following output:
 
 ```
-info: tcod red: .cimport:3:11.struct_TCOD_ColorRGB{ .r = 255, .g = 0, .b = 0 }
+info: tcod red: .{ .r = 255, .g = 0, .b = 0 }
 ```
 
 Hello libtcod world?
 
 ## Tests
 
-I like tests. Zig gives us tests embedded in the code, which we can easily run with `zig test`. Since I'm using C imports and libraries I need to add those on the command line:
+I like tests. Zig gives us tests embedded in the code, which we can easily run with `zig build test`. First we need to add some content to `build.zig` to support libraries in our tests:
+
+```zig
+// Tests
+const exe_tests = b.addTest(.{
+    .root_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+    }),
+});
+exe_tests.linkLibC();
+
+// Check if TARGET is macOS
+if (target.result.os.tag == .macos) {
+    exe_tests.linkSystemLibrary("tcod");
+
+    // specific to Apple Silicon (M1/M2/M3)
+    exe_tests.addIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
+    exe_tests.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
+
+    // Optional: Support Intel Macs too (they use /usr/local)
+    exe_tests.addIncludePath(.{ .cwd_relative = "/usr/local/include" });
+    exe_tests.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
+} else {
+    exe_tests.linkSystemLibrary("libtcod");
+}
+
+// Set up the `zig build test` command
+const run_tests = b.addRunArtifact(exe_tests);
+const run_tests_step = b.step("test", "Run unit tests");
+run_tests_step.dependOn(&run_tests.step);
+```
+
+Running `zig build test` will result in no output by default (no news is good news) but if you want to see all the details do:
 
 ```
-zig test src/main.zig --library tcod --library c
+zig build test --summary all
 ```
 
-At the moment I just have 1 test that checks to see if the `TCOD_red.r` constant has a value of `255` (basically checking to see that we can import the C header and access the value inside without any errors...
+Which results in the output:
 
 ```
-All 1 tests passed.
+Build Summary: 3/3 steps succeeded; 1/1 tests passed
+test success
+└─ run test 1 passed 4ms MaxRSS:8M
+   └─ compile test Debug native cached 45ms MaxRSS:34M
 ```
 
-This feels more like an "integration test" than a unit test at the moment. Also, I'm not so sure about `--library` since Windows doesn't have system libraries like linux does. Reading the following Zig issue thread makes me think I should port this to the `build.zig` file and use `--library-path` instead.
+Lovely!
 
-https://github.com/ziglang/zig/issues/2041
-
-After reading this I realized I had already used the new function discussed to configure libtcod for the regular exe build. I went back to my `build.zig` file and added essentially same two lines (`linkLibC()` and `linkSystemLibrary("libtcod")`) to the `exe_tests` part.
-
-Reran the tests this time using `zig build test`, which doesn't require me to specify a certain zig file to test...
-
-```
-All 1 tests passed.
-```
-
-Hooray! I like the latter approach here of using the `build.zig` configuration with `zig build test`.
+_Not sure how this translates to windows at the moment._
 
 ## Notes
 
 Just opened this up today after working on it last night and ran `zig build run` but got an error that `cimport.zig` couldn't be found?
 - deleted the `zig-cache` and `zig-out` folder and ran again and things worked as expected
-
-## Links
-
-Zig official docs build chapter
-https://ziglearn.org/chapter-3/
-
-Using Zig build system series (part 1)
-https://zig.news/xq/zig-build-explained-part-1-59lf
