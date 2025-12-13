@@ -1,6 +1,7 @@
 # Todo
 
-- migrate to new style tcod context/console initialization
+- refactor part-0 text
+- migrate parts 1-7 to new tcod init
 - part-7
     - sometimes there are no enemies? part-7
     - entire health bar turns red upon getting hit once but im not dead yet
@@ -17,3 +18,7 @@
 ## Bugs
 
 - fix occasional zombie process after quitting
+
+## Done
+
+- migrate to new style tcod context/console initialization (part-0 PoC)
