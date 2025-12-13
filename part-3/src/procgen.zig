@@ -157,13 +157,13 @@ test "tunnelBetween" {
     const t = try tunnelBetween(.{ .x = 0, .y = 0 }, .{ .x = 5, .y = 5 }, std.testing.allocator);
     defer std.testing.allocator.free(t);
     try expect(t.len == 10);
-    try expect(std.meta.eql(t[4], .{ .x = 0, .y = 5 }) or std.meta.eql(t[5], .{ .x = 5, .y = 0 }));
+    try expect(std.meta.eql(t[4], .{ .x = 0, .y = 5 }));
 }
 
 test "line" {
     var innerList: ArrayList(Coord) = .empty;
     defer innerList.deinit(std.testing.allocator);
-    try line(.{ .x = 0, .y = 0 }, .{ .x = 2, .y = 2 }, &innerList);
+    try line(.{ .x = 0, .y = 0 }, .{ .x = 2, .y = 2 }, &innerList, std.testing.allocator);
     try expect(innerList.items.len == 2);
     try expect(std.meta.eql(innerList.items[0], Coord{ .x = 1, .y = 1 }));
     try expect(std.meta.eql(innerList.items[1], Coord{ .x = 2, .y = 2 }));

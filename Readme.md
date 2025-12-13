@@ -1,4 +1,8 @@
-# Zig Rogulike Tutorial 2022
+# Zig Roguelike Tutorial
+
+12/2025: I have restarted this project this year with the hope of finally finishing a full implementation of the tutorial using libtcod and the latest version of Zig! So far I have fixed all the parts so they once again build on linux and osx and should run without major issues.
+
+## Intro
 
 Each folder in this repository contains the full code to a part of the roguelike tutorial translated for Zig.
 
@@ -23,7 +27,7 @@ See each part folder for a readme explanation of how that part was written, what
 
 Enjoy!
 
-# Parts
+## Parts
 
 To run each part cd into the folder and execute `zig build run`. To do this make sure you've installed the libtcod headers and the library itself, along with SDL2, on your system -- see part-0 for some details on that.
 
@@ -48,7 +52,14 @@ To run each part cd into the folder and execute `zig build run`. To do this make
 The Roguelike Tutorials
 https://rogueliketutorials.com/
 
+The roguelike tutorial in python
+https://rogueliketutorials.com/tutorials/tcod/v2/
+
 Roguelike dev subreddit
 https://www.reddit.com/r/roguelikedev/
 
+## History
+
 Note: I started this project in 2022 using a different username on gitlab.com (clockworkmartian) and have since come back to github and reclaimed my old anotherlehner account.
+
+AI disclaimer: None of the code in this repository was written with generative AI or LLMs. I do consult Gemini, ChatGPT, or whatever for finding documentation and helping solve a problem but I never copy and paste that code here. This is a personal project on my own time and as such I want to understand as much as possible about what I'm doing, how it feels to write code in Zig, and experiencing all parts of the process. This also includes my own tutorial narrative text, which is solely written by myself with no input from AI.

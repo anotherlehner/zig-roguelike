@@ -77,8 +77,8 @@ fn evKeydown(key: tcod.TcodKey) ?models.ActionType {
 
 test "evKeydown up" {
     const action = evKeydown(initKeyWithVk(tcod.KeyUp)).?;
-    try expect(action.moveAction.dx == 0);
-    try expect(action.moveAction.dy == -1);
+    try expect(action.bumpAction.dx == 0);
+    try expect(action.bumpAction.dy == -1);
 }
 
 test "initKeyWithVk should set given key on returned structure" {
