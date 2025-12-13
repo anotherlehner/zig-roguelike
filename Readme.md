@@ -1,5 +1,7 @@
 # Zig Roguelike Tutorial
 
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner), [MIT License](LICENSE))
+
 12/2025: I have restarted this project this year with the hope of finally finishing a full implementation of the tutorial using libtcod and the latest version of Zig! So far I have fixed all the parts so they once again build on linux and osx and should run without major issues.
 
 ## Intro
