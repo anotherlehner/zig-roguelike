@@ -10,21 +10,39 @@ To run each part cd into the folder and execute `zig build run`. To do this make
 
 [Repository](https://github.com/anotherlehner/zig-roguelike)
 
-[Part-0](part-0)
+[Part 0 - Setting Up](part-0)
 
-[Part-1](part-1)
+[Part 1 - Drawing the '@' symbol and moving it around](part-1)
 
-[Part-2](part-2)
+[Part 2 - The generic Entity, the render functions, and the map](part-2)
 
-[Part-3](part-3)
+[Part 3 - Generating a dungeon](part-3)
 
-[Part-4](part-4)
+[Part 4 - Field of view](part-4)
 
-[Part-5](part-5)
+[Part 5 - Placing enemies and kicking them (harmlessly)](part-5)
 
-[Part-6](part-6)
+[Part 6 - Doing (and taking) some damage](part-6)
 
-[Part-7](part-7)
+[Part 7 - Creating the interface](part-7)
+
+Part 8 - Items and inventory (TODO)
+
+Part 9 - Ranged scrolls and targeting (TODO)
+
+Part 10 - Saving and loading (TODO)
+
+Part 11 - Delving into the dungeon (TODO)
+
+Part 12 - Increasing difficulty (TODO)
+
+Part 13 - Gearing up (TODO)
+
+### Extras
+
+A more "Traditional look (TODO)
+
+_Note: I have tried to roughly keep the parts of my tutorial the same as the parts of the typical python tcod tutorial so the content can be compared more easily and the flow is similar._
 
 ## Intro
 

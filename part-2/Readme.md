@@ -1,5 +1,7 @@
 # Part 2: The generic Entity, the render functions, and the map
 
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
+
 **NOTE: This readme for part 2 got a bit messy during development. Think of this file more as a log of my thinking as I went through part 2 than a tutorial. Will come back and improve this later.**
 
 ## Colors
