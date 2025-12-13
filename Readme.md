@@ -4,6 +4,21 @@ By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
 
 12/2025: I have restarted this project this year with the hope of finally finishing a full implementation of the tutorial using libtcod and the latest version of Zig! So far I have fixed all the parts so they once again build on linux and osx and should run without major issues.
 
+## Parts
+
+To run each part cd into the folder and execute `zig build run`. To do this make sure you've installed the libtcod headers and the library itself, along with SDL2, on your system -- see part-0 for some details on that.
+
+[Repository](https://github.com/anotherlehner/zig-roguelike)
+
+[Part-0](part-0)
+[Part-1](part-1)
+[Part-2](part-2)
+[Part-3](part-3)
+[Part-4](part-4)
+[Part-5](part-5)
+[Part-6](part-6)
+[Part-7](part-7)
+
 ## Intro
 
 Each folder in this repository contains the full code to a part of the roguelike tutorial translated for Zig.
@@ -28,28 +43,6 @@ zig-cache/
 See each part folder for a readme explanation of how that part was written, what issues I encountered, how I solved problems, and what I was thinking.
 
 Enjoy!
-
-## Parts
-
-[Repository](https://github.com/anotherlehner/zig-roguelike)
-
-To run each part cd into the folder and execute `zig build run`. To do this make sure you've installed the libtcod headers and the library itself, along with SDL2, on your system -- see part-0 for some details on that.
-
-[Part-0](part-0)
-
-[Part-1](part-1)
-
-[Part-2](part-2)
-
-[Part-3](part-3)
-
-[Part-4](part-4)
-
-[Part-5](part-5)
-
-[Part-6](part-6)
-
-[Part-7](part-7)
 
 # Links
 
