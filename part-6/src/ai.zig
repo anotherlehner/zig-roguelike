@@ -28,9 +28,7 @@ const PathContext = struct {
 
 /// C callback function for pathfinding
 fn pathFunction(xFrom: c_int, yFrom: c_int, xTo: c_int, yTo: c_int, userData: ?*anyopaque) callconv(.c) f32 {
-    // var ctx = @ptrCast(*PathContext, @alignCast(@alignOf(*PathContext), userData));
     var ctx: *PathContext = @ptrCast(@alignCast(userData.?));
-    // var ctx = userData;
     _ = xFrom;
     _ = yFrom;
     const isTarget = ctx.target.x == xTo and ctx.target.y == yTo;

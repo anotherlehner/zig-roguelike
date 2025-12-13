@@ -24,11 +24,10 @@ pub const Entity = struct {
     x: i32 = 0,
     y: i32 = 0,
     glyph: u8 = '?',
-    color: tcod.TcodColorRGB = color.rgb(255,255,255),
+    color: tcod.TcodColorRGB = color.rgb(255, 255, 255),
     name: []const u8 = "Unnamed",
     blocksMovement: bool = false,
-    // components: []ComponentType = undefined, TODO
-    component: ComponentType = null,
+    component: ComponentType = undefined,
     ai: ?ai.AIType = null, // optional ai
     isPlayer: bool = false,
     renderOrder: RenderOrder = RenderOrder.corpse,
@@ -61,12 +60,10 @@ pub const ComponentFighter = struct {
 
 pub fn die(eng: *engine.Engine, e: *Entity) void {
     if (e.isPlayer) {
-        var msg = std.fmt.allocPrint(eng.allocator, "You died!", 
-            .{}) catch @panic("eom");
+        const msg = std.fmt.allocPrint(eng.allocator, "You died!", .{}) catch @panic("eom");
         eng.log.addMessage(msg, color.Player_die, true);
     } else {
-        var msg = std.fmt.allocPrint(eng.allocator, "{} died.", 
-            .{e.name}) catch @panic("eom");
+        const msg = std.fmt.allocPrint(eng.allocator, "{s} died.", .{e.name}) catch @panic("eom");
         eng.log.addMessage(msg, color.Enemy_die, true);
     }
 
@@ -82,11 +79,11 @@ pub fn orc(x: i32, y: i32, allocator: Allocator) !*Entity {
     const e = try allocator.create(Entity);
     e.x = x;
     e.y = y;
-    e.glyph='o';
-    e.color = color.rgb(63,127,63);
-    e.name="Orc";
+    e.glyph = 'o';
+    e.color = color.rgb(63, 127, 63);
+    e.name = "Orc";
     e.blocksMovement = true;
-    e.component.fighter = ComponentFighter{.maxHp=10, .hp=10, .defense=0, .power=3};
+    e.component.fighter = ComponentFighter{ .maxHp = 10, .hp = 10, .defense = 0, .power = 3 };
     e.ai = ai.AIType.hostile;
     e.renderOrder = RenderOrder.actor;
     return e;
@@ -97,10 +94,10 @@ pub fn troll(x: i32, y: i32, allocator: Allocator) !*Entity {
     e.x = x;
     e.y = y;
     e.glyph = 'T';
-    e.color = color.rgb(0,127,0);
-    e.name="Troll";
+    e.color = color.rgb(0, 127, 0);
+    e.name = "Troll";
     e.blocksMovement = true;
-    e.component.fighter = ComponentFighter{.maxHp=16, .hp=16, .defense=1, .power=4};
+    e.component.fighter = ComponentFighter{ .maxHp = 16, .hp = 16, .defense = 1, .power = 4 };
     e.renderOrder = RenderOrder.actor;
     return e;
 }
@@ -110,10 +107,10 @@ pub fn player(x: i32, y: i32, allocator: Allocator) !*Entity {
     e.x = x;
     e.y = y;
     e.glyph = '@';
-    e.color = color.rgb(255,255,255);
+    e.color = color.rgb(255, 255, 255);
     e.name = "Player";
     e.blocksMovement = true;
-    e.component.fighter = ComponentFighter{.maxHp=30, .hp=30, .defense=2, .power=5};
+    e.component.fighter = ComponentFighter{ .maxHp = 30, .hp = 30, .defense = 2, .power = 5 };
     e.isPlayer = true;
     e.renderOrder = RenderOrder.actor;
     return e;

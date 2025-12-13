@@ -48,9 +48,9 @@ pub fn performEscapeAction(eng: *engine.Engine) void {
 }
 
 pub fn performBumpAction(eng: *engine.Engine, bump: BumpAction) void {
-    var nx = eng.player.x+bump.dx;
-    var ny = eng.player.y+bump.dy;
-    if (eng.map.getBlockingEntity(nx,ny)) |target| {
+    const nx = eng.player.x + bump.dx;
+    const ny = eng.player.y + bump.dy;
+    if (eng.map.getBlockingEntity(nx, ny)) |target| {
         if (target.component == ent.ComponentType.fighter) {
             performMeleeAction(eng, eng.player, target);
         }
@@ -60,26 +60,24 @@ pub fn performBumpAction(eng: *engine.Engine, bump: BumpAction) void {
 }
 
 pub fn performMoveAction(m: *Map, entity: *Entity, nx: i32, ny: i32) void {
-    if (m.isWalkable(nx,ny)) {
+    if (m.isWalkable(nx, ny)) {
         entity.x = nx;
         entity.y = ny;
     }
 }
 
 pub fn performMeleeAction(eng: *engine.Engine, source: *Entity, target: *Entity) void {
-    var damage = source.component.fighter.power - target.component.fighter.defense;
-    var attackColor = if(source.isPlayer) color.Player_atk else color.Enemy_atk;
+    const damage = source.component.fighter.power - target.component.fighter.defense;
+    const attackColor = if (source.isPlayer) color.Player_atk else color.Enemy_atk;
     if (damage > 0) {
-        var msg = std.fmt.allocPrint(eng.allocator, "{} attacks {} for {d} damage", 
-            .{source.name, target.name, damage}) catch @panic("eom");
+        const msg = std.fmt.allocPrint(eng.allocator, "{s} attacks {s} for {d} damage", .{ source.name, target.name, damage }) catch @panic("eom");
         eng.log.addMessage(msg, attackColor, true);
-        target.component.fighter.setHp(target.component.fighter.hp-damage);
+        target.component.fighter.setHp(target.component.fighter.hp - damage);
         if (target.component.fighter.hp == 0) {
             ent.die(eng, target);
         }
     } else {
-        var msg = std.fmt.allocPrint(eng.allocator, "{} attacks {} but does no damage", 
-            .{source.name, target.name}) catch @panic("eom");
+        const msg = std.fmt.allocPrint(eng.allocator, "{s} attacks {s} but does no damage", .{ source.name, target.name }) catch @panic("eom");
         eng.log.addMessage(msg, attackColor, true);
     }
 }

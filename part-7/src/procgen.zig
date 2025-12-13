@@ -65,9 +65,9 @@ pub fn placeEntities(room: *RectangularRoom, m: *Map, maxMonsters: i32, allocato
         const y: i32 = rnd.random().intRangeAtMost(i32, room.y1 + 1, room.y2 - 1);
         const monsterType = rnd.random().intRangeAtMost(i32, 1, 10);
         if (monsterType < 8) {
-            try m.addEntity(try ent.orc(x, y, allocator));
+            try m.addEntity(try ent.orc(x, y, allocator), allocator);
         } else {
-            try m.addEntity(try ent.troll(x, y, allocator));
+            try m.addEntity(try ent.troll(x, y, allocator), allocator);
         }
         i += 1;
     }
@@ -181,7 +181,7 @@ test "tunnelBetween" {
 test "line" {
     var innerList: ArrayList(Coord) = .empty;
     defer innerList.deinit(std.testing.allocator);
-    try line(.{ .x = 0, .y = 0 }, .{ .x = 2, .y = 2 }, &innerList);
+    try line(.{ .x = 0, .y = 0 }, .{ .x = 2, .y = 2 }, &innerList, std.testing.allocator);
     try expect(innerList.items.len == 2);
     try expect(std.meta.eql(innerList.items[0], Coord{ .x = 1, .y = 1 }));
     try expect(std.meta.eql(innerList.items[1], Coord{ .x = 2, .y = 2 }));
