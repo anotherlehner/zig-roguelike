@@ -1,6 +1,6 @@
 # Zig Roguelike Tutorial
 
-By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner), [MIT License](LICENSE))
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
 
 12/2025: I have restarted this project this year with the hope of finally finishing a full implementation of the tutorial using libtcod and the latest version of Zig! So far I have fixed all the parts so they once again build on linux and osx and should run without major issues.
 
@@ -30,6 +30,8 @@ See each part folder for a readme explanation of how that part was written, what
 Enjoy!
 
 ## Parts
+
+[Repository](https://github.com/anotherlehner/zig-roguelike)
 
 To run each part cd into the folder and execute `zig build run`. To do this make sure you've installed the libtcod headers and the library itself, along with SDL2, on your system -- see part-0 for some details on that.
 

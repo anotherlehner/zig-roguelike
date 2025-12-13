@@ -1,3 +1,5 @@
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
+
 # Part 0: Setting Up
 
 ## Install Zig
