@@ -1,18 +1,71 @@
-//! zig-roguelike, by @anotherlehner
+//! zig-roguelike, by Martin Lehner (@anotherlehner)
 const std = @import("std");
 const expect = std.testing.expect;
 
-// translate and import the libtcod C library headers
+// translate and import the libtcod C and libSDL3 library headers
 const c = @cImport({
     @cInclude("libtcod.h");
+
+    // Unknown if this is a dangerous idea because I may be mixing namespaces?
+    @cInclude("SDL3/SDL.h");
 });
 
 // using small values now because the resulting window is large and easy to see
 const SCREEN_WIDTH = 40;
 const SCREEN_HEIGHT = 25;
 
-// ascii code for the @ character
-const ASCII_AT = 64;
+pub fn main() anyerror!void {
+    var params = c.TCOD_ContextParams{
+        .tcod_version = c.TCOD_COMPILEDVERSION,
+        .columns = SCREEN_WIDTH,
+        .rows = SCREEN_HEIGHT,
+        .renderer_type = c.TCOD_RENDERER_SDL2,
+        .vsync = 1,
+        .window_title = "Zig Roguelike",
+        .sdl_window_flags = c.SDL_WINDOW_RESIZABLE,
+        .pixel_width = 800,
+        .pixel_height = 600,
+        .console = c.TCOD_console_new(40, 25),
+        .tileset = c.TCOD_tileset_load("../dejavu10x10_gs_tc.png", 32, 8, 256, &c.TCOD_CHARMAP_TCOD)
+    };
+
+    var context: ?*c.TCOD_Context = null;
+    _ = c.TCOD_context_new(&params, &context);
+    defer { 
+        // Make sure the quit function is called when main() exits
+        c.TCOD_quit();
+    }
+
+    // Struct to hold key events when they occur to be processed
+    var key = c.TCOD_key_t{ .vk = c.TCODK_NONE, .c = 0 };
+
+    var playerX: i16 = SCREEN_WIDTH / 2;
+    var playerY: i16 = SCREEN_HEIGHT / 2;
+
+    while (!c.TCOD_console_is_window_closed()) {
+        // Clear
+        c.TCOD_console_clear(params.console);
+
+        // Print
+        c.TCOD_console_print(params.console, playerX, playerY, "@");
+
+        // Render (ignore errors)
+        _ = c.TCOD_context_present(context, params.console, null);
+
+        // Events (ignore errors)
+        _ = c.TCOD_sys_check_for_event(c.TCOD_EVENT_KEY_PRESS, &key, null);
+        const optionalAction = evKeydown(key);
+        if (optionalAction) |action| {
+            switch (action) {
+                ActionType.escapeAction => return,
+                ActionType.moveAction => |m| {
+                    playerX += m.dx;
+                    playerY += m.dy;
+                },
+            }
+        }
+    }
+}
 
 // Structs for the available action types
 const EscapeAction = struct {};
@@ -30,43 +83,6 @@ const ActionType = union(ActionTypeTag) {
     escapeAction: EscapeAction,
     moveAction: MoveAction,
 };
-
-pub fn main() anyerror!void {
-    _ = c.TCOD_console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, "Zig Roguelike", false, c.TCOD_RENDERER_SDL2);
-    defer { // Make sure the quit function is called when main() exits
-        c.TCOD_quit();
-    }
-
-    var key = c.TCOD_key_t{ .vk = c.TCODK_NONE, .c = 0, .text = undefined, .pressed = undefined, .lalt = undefined, .lctrl = undefined, .lmeta = undefined, .ralt = undefined, .rctrl = undefined, .rmeta = undefined, .shift = undefined };
-    var playerX: i16 = SCREEN_WIDTH / 2; // initial player x position
-    var playerY: i16 = SCREEN_HEIGHT / 2; // initial player y position
-    // std.log.info("player x: {d}, y: {d}", .{ playerX, playerY });
-
-    _ = c.TCOD_console_set_custom_font("../dejavu10x10_gs_tc.png", c.TCOD_FONT_TYPE_GREYSCALE | c.TCOD_FONT_LAYOUT_TCOD, 0, 0);
-
-    while (!c.TCOD_console_is_window_closed()) {
-        // Clear
-        c.TCOD_console_clear(null);
-
-        // Render
-        c.TCOD_console_set_char(null, playerX, playerY, ASCII_AT); // draw the player symbol
-        _ = c.TCOD_console_flush(); // render the drawn console to the screen
-
-        // Events
-        _ = c.TCOD_sys_check_for_event(c.TCOD_EVENT_KEY_PRESS, &key, null);
-
-        const optionalAction = evKeydown(key);
-        if (optionalAction) |action| {
-            switch (action) {
-                ActionType.escapeAction => return,
-                ActionType.moveAction => |m| {
-                    playerX += m.dx;
-                    playerY += m.dy;
-                },
-            }
-        }
-    }
-}
 
 // Returns a TCOD key struct initialized with an empty key code
 fn initKey() c.TCOD_key_t {

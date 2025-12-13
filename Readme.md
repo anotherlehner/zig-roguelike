@@ -24,7 +24,7 @@ To run each part cd into the folder and execute `zig build run`. To do this make
 
 [Part 6 - Doing (and taking) some damage](part-6)
 
-[Part 7 - Creating the interface](part-7)
+[Part 7 - Creating the interface](part-7) (IN PROGRESS)
 
 Part 8 - Items and inventory (TODO)
 
