@@ -11,12 +11,19 @@ To run each part cd into the folder and execute `zig build run`. To do this make
 [Repository](https://github.com/anotherlehner/zig-roguelike)
 
 [Part-0](part-0)
+
 [Part-1](part-1)
+
 [Part-2](part-2)
+
 [Part-3](part-3)
+
 [Part-4](part-4)
+
 [Part-5](part-5)
+
 [Part-6](part-6)
+
 [Part-7](part-7)
 
 ## Intro
