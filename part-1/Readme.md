@@ -1,5 +1,7 @@
 # Part 1: Drawing the '@' symbol and moving around
 
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
+
 ## Initializing the console
 
 We start a libtcod project by opening a simple window with nothing in it. Using the C API this looks like the following:

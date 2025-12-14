@@ -1,4 +1,4 @@
-//! zig-roguelike, by @anotherlehner
+//! zig-roguelike, by Martin Lehner (@anotherlehner)
 
 const std = @import("std");
 const tcod = @import("tcod.zig");
@@ -11,8 +11,6 @@ const Message = struct {
     text: []u8,
     fg: tcod.TcodColorRGB,
     count: u8 = 1,
-
-
 };
 
 pub const MessageLog = struct {
@@ -20,19 +18,16 @@ pub const MessageLog = struct {
     messages: ArrayList(Message),
 
     pub fn init(allocator: Allocator) MessageLog {
-        var ms = ArrayList(Message).init(allocator);
-        return MessageLog{
-            .allocator = allocator,
-            .messages = ms
-        };
+        const ms: ArrayList(Message) = .empty;
+        return MessageLog{ .allocator = allocator, .messages = ms };
     }
 
     pub fn addMessage(self: *MessageLog, text: []u8, fg: tcod.TcodColorRGB, stack: bool) void {
-        if (stack and self.messages.items.len > 0 and std.mem.eql(u8, self.messages.items[self.messages.items.len-1].text, text)) {
-            self.messages.items[self.messages.items.len-1].count += 1;
+        if (stack and self.messages.items.len > 0 and std.mem.eql(u8, self.messages.items[self.messages.items.len - 1].text, text)) {
+            self.messages.items[self.messages.items.len - 1].count += 1;
             self.allocator.free(text);
         } else {
-            self.messages.append(Message{.text=text, .fg=fg}) catch @panic("oom");
+            self.messages.append(self.allocator, Message{ .text = text, .fg = fg }) catch @panic("oom");
         }
     }
 
@@ -40,14 +35,14 @@ pub const MessageLog = struct {
         for (self.messages.items) |m| {
             self.allocator.free(m.text);
         }
-        self.messages.deinit();
+        self.messages.deinit(self.allocator);
     }
 };
 
 test "messagelog.addMessage" {
     var ml = MessageLog.init(std.testing.allocator);
     defer ml.deinit();
-    var msg = std.fmt.allocPrint(std.testing.allocator, "message", .{}) catch @panic("eom");
+    const msg = std.fmt.allocPrint(std.testing.allocator, "message", .{}) catch @panic("eom");
     ml.addMessage(msg, color.White_rgb, true);
     try expect(std.mem.eql(u8, ml.messages.items[0].text, msg));
 }

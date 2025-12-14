@@ -1,4 +1,6 @@
-# Part 6: Doing and taking damage
+# Part 6: Doing (and taking) damage
+
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
 
 ## Refactoring
 

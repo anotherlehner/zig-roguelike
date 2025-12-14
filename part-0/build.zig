@@ -37,7 +37,21 @@ pub fn build(b: *std.Build) void {
         }),
     });
     exe_tests.linkLibC();
-    exe_tests.linkSystemLibrary("libtcod");
+
+    // Check if TARGET is macOS
+    if (target.result.os.tag == .macos) {
+        exe_tests.linkSystemLibrary("tcod");
+
+        // specific to Apple Silicon (M1/M2/M3)
+        exe_tests.addIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
+        exe_tests.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
+
+        // Optional: Support Intel Macs too (they use /usr/local)
+        exe_tests.addIncludePath(.{ .cwd_relative = "/usr/local/include" });
+        exe_tests.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
+    } else {
+        exe_tests.linkSystemLibrary("libtcod");
+    }
 
     // Set up the `zig build test` command
     const run_tests = b.addRunArtifact(exe_tests);

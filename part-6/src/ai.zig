@@ -1,4 +1,4 @@
-//! zig-roguelike, by @anotherlehner
+//! zig-roguelike, by Martin Lehner (@anotherlehner)
 const std = @import("std");
 const ent = @import("entity.zig");
 const map = @import("map.zig");
@@ -27,9 +27,8 @@ const PathContext = struct {
 };
 
 /// C callback function for pathfinding
-fn pathFunction(xFrom: c_int, yFrom: c_int, xTo: c_int, yTo: c_int, userData: ?*anyopaque) callconv(.C) f32 {
-    // var ctx = @ptrCast(*PathContext, @alignCast(@alignOf(*PathContext), userData));
-    var ctx = userData;
+fn pathFunction(xFrom: c_int, yFrom: c_int, xTo: c_int, yTo: c_int, userData: ?*anyopaque) callconv(.c) f32 {
+    var ctx: *PathContext = @ptrCast(@alignCast(userData.?));
     _ = xFrom;
     _ = yFrom;
     const isTarget = ctx.target.x == xTo and ctx.target.y == yTo;
@@ -43,8 +42,7 @@ fn pathFunction(xFrom: c_int, yFrom: c_int, xTo: c_int, yTo: c_int, userData: ?*
 }
 
 const AIHostileEnemy = struct {
-    pub fn act(self: AIHostileEnemy, source: *ent.Entity, 
-            target: *ent.Entity, mp: *map.Map) void {
+    pub fn act(self: AIHostileEnemy, source: *ent.Entity, target: *ent.Entity, mp: *map.Map) void {
         _ = self;
         const absDx = @abs(target.x - source.x);
         const absDy = @abs(target.y - source.y);
@@ -53,7 +51,7 @@ const AIHostileEnemy = struct {
             if (distance <= 1) {
                 action.performMeleeAction(source, target);
             } else {
-                var ctx = PathContext{.mp=mp, .target=map.Coord{.x=target.x,.y=target.y}};
+                var ctx = PathContext{ .mp = mp, .target = map.Coord{ .x = target.x, .y = target.y } };
                 const pathToTarget = tcod.pathNewUsingFn(mp.width, mp.height, pathFunction, &ctx);
                 defer {
                     tcod.pathDelete(pathToTarget);

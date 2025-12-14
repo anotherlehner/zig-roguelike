@@ -1,4 +1,4 @@
-//! zig-roguelike, by @anotherlehner
+//! zig-roguelike, by Martin Lehner (@anotherlehner)
 
 const std = @import("std");
 const tcod = @import("tcod.zig");
@@ -21,19 +21,23 @@ pub fn render(console: tcod.TcodConsole, m: *map.Map, player: *ent.Entity, log: 
 
 fn renderExamine(console: tcod.TcodConsole, m: *map.Map, mx: i32, my: i32) void {
     if (!m.isInFov(mx, my)) return;
-    var exText = m.examine(mx, my);
+    const exText = m.examine(mx, my);
     tcod.consolePrintFgMaxLength(console, 0, 46, exText, color.White_rgb, 20);
     m.allocator.free(exText);
 }
 
 fn renderMessages(console: tcod.TcodConsole, x: i32, y: i32, width: i32, height: i32, log: *messagelog.MessageLog) void {
     var y_offset: i32 = y;
-    var yi = @intCast(i64, log.messages.items.len) - 1;
+    const len = log.messages.items.len;
+    if (len == 0) {
+        return;
+    }
+    var yi: i32 = @intCast(len - 1);
     var nRendered: i32 = 0;
     while (yi >= 0 and nRendered < height) : (yi -= 1) {
-        var msg = &log.messages.items[@intCast(usize, yi)];
+        const msg = &log.messages.items[@intCast(yi)];
         if (msg.count > 1) {
-            var fullMsg = std.fmt.allocPrint(log.allocator, "{} (x{d})", .{ msg.text, msg.count }) catch @panic("eom");
+            const fullMsg = std.fmt.allocPrint(log.allocator, "{s} (x{d})", .{ msg.text, msg.count }) catch @panic("eom");
             tcod.consolePrintFgMaxLength(console, x, y_offset, fullMsg, msg.fg, width);
             log.allocator.free(fullMsg);
         } else {
@@ -46,7 +50,7 @@ fn renderMessages(console: tcod.TcodConsole, x: i32, y: i32, width: i32, height:
 }
 
 fn renderBar(console: tcod.TcodConsole, curValue: i32, maxValue: i32, totWidth: i32, allocator: Allocator) void {
-    var barWidth = @floatToInt(i32, @intToFloat(f32, curValue) / @intToFloat(f32, maxValue) * @intToFloat(f32, totWidth)); // cast?
+    const barWidth = @divFloor(curValue, maxValue) * totWidth;
 
     tcod.consoleDrawRectRgb(console, 0, 45, totWidth, 1, 1, color.Bar_empty, color.Bar_empty);
 
@@ -54,7 +58,7 @@ fn renderBar(console: tcod.TcodConsole, curValue: i32, maxValue: i32, totWidth: 
         tcod.consoleDrawRectRgb(console, 0, 45, barWidth, 1, 1, color.Bar_filled, color.Bar_filled);
     }
 
-    var msg = std.fmt.allocPrint(allocator, "hp: {d}/{d}", .{ curValue, maxValue }) catch @panic("eom");
+    const msg = std.fmt.allocPrint(allocator, "hp: {d}/{d}", .{ curValue, maxValue }) catch @panic("eom");
     tcod.consolePrintFg(console, 1, 45, msg, color.White_rgb);
     allocator.free(msg);
 }

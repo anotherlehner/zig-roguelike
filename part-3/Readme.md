@@ -1,4 +1,6 @@
-# Part 3
+# Part 3: Generating a dungeon
+
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
 
 Encountered a lot of challenges doing this part...
 

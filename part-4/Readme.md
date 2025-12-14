@@ -1,5 +1,7 @@
 # Part 4: Field of view
 
+By Martin Lehner ([@anotherlehner](https://github.com/anotherlehner))
+
 ## Map changes
 
 To implement field of view I had to make one major change to the way my code was organized: I needed to start using a C struct from libtcod called `TCOD_map_t` to store my map for field of view. Instead of changing a whole bunch of things and trying to get rid of my own map struct I decided to simply store a `TCOD_map_t` in my map struct and manage it internal to the map. This way the callers using the map don't have to interact directly with the tcod map structure and instead get the nice facade of Zig functions instead.

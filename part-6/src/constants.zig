@@ -1,4 +1,4 @@
-//! zig-roguelike, by @anotherlehner
+//! zig-roguelike, by Martin Lehner (@anotherlehner)
 
 pub const TITLE = "Zig Roguelike";
 pub const TILESET = "../dejavu10x10_gs_tc.png";

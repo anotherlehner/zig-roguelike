@@ -1,4 +1,4 @@
-//! zig-roguelike, by @anotherlehner
+//! zig-roguelike, by Martin Lehner (@anotherlehner)
 
 const std = @import("std");
 const color = @import("color.zig");
@@ -130,7 +130,7 @@ pub const Map = struct {
 
 test "map.init" {
     var m = try Map.init(10, 10, std.testing.allocator);
-    defer _ = m.deinit();
+    defer _ = m.deinit(std.testing.allocator);
     try expect(m.cells.len > 0);
 }
 
@@ -150,7 +150,7 @@ test "map.inBounds2" {
 
 test "map.fill should fill all cells with the same kind" {
     var m = try Map.init(2, 2, std.testing.allocator);
-    defer _ = m.deinit();
+    defer _ = m.deinit(std.testing.allocator);
     m.fill(WALL);
     try expect(std.meta.eql((m.get(0,0)).*, WALL));
     try expect(std.meta.eql((m.get(0,1)).*, WALL));

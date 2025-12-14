@@ -1,4 +1,4 @@
-//! zig-roguelike, by @anotherlehner
+//! zig-roguelike, by Martin Lehner (@anotherlehner)
 
 const std = @import("std");
 const color = @import("color.zig");
@@ -27,15 +27,14 @@ pub const Tile = struct {
     dark: color.Graphic,
 };
 
-pub const FLOOR = Tile{ .walkable = true, .transparent = true, 
+pub const FLOOR = Tile{
+    .walkable = true,
+    .transparent = true,
     .dark = color.Graphic{ .ch = ' ', .fg = color.White, .bg = color.SoftBlue },
-    .light = color.Graphic{ .ch=' ', .fg=color.White, .bg = color.rgba(200,180,50,255)},
+    .light = color.Graphic{ .ch = ' ', .fg = color.White, .bg = color.rgba(200, 180, 50, 255) },
 };
 
-pub const WALL = Tile{ 
-    .dark = color.Graphic{ .ch = ' ', .fg = color.White, .bg = color.DarkBlue },
-    .light = color.Graphic{ .ch=' ', .fg=color.White, .bg=color.rgba(130,110,50,255)}
-};
+pub const WALL = Tile{ .dark = color.Graphic{ .ch = ' ', .fg = color.White, .bg = color.DarkBlue }, .light = color.Graphic{ .ch = ' ', .fg = color.White, .bg = color.rgba(130, 110, 50, 255) } };
 
 pub const Map = struct {
     width: i32,
@@ -54,7 +53,7 @@ pub const Map = struct {
     }
 
     pub fn inBounds(self: *Map, x: i32, y: i32) bool {
-        return 0 <= x and x < self.width and 0 <= y and y < self.height and self.idx(x,y) < self.width * self.height;
+        return 0 <= x and x < self.width and 0 <= y and y < self.height and self.idx(x, y) < self.width * self.height;
     }
 
     pub fn fill(self: *Map, tileToFill: Tile) void {
@@ -66,8 +65,8 @@ pub const Map = struct {
     }
 
     pub fn set(self: *Map, x: i32, y: i32, tileToSet: Tile) void {
-        if (!self.inBounds(x,y)) std.debug.panic("outside of map: {d},{d}\n", .{x,y});
-        self.cells[self.idx(x,y)] = tileToSet;
+        if (!self.inBounds(x, y)) std.debug.panic("outside of map: {d},{d}\n", .{ x, y });
+        self.cells[self.idx(x, y)] = tileToSet;
         tcod.mapSetProperties(self.tcMap, x, y, tileToSet.transparent, tileToSet.walkable);
     }
 
@@ -80,8 +79,8 @@ pub const Map = struct {
     }
 
     pub fn get(self: *Map, x: i32, y: i32) *Tile {
-        if (!self.inBounds(x,y)) @panic("outside of map");
-        return &self.cells[self.idx(x,y)];
+        if (!self.inBounds(x, y)) @panic("outside of map");
+        return &self.cells[self.idx(x, y)];
     }
 
     pub fn isInFov(self: *Map, x: i32, y: i32) bool {
@@ -89,8 +88,8 @@ pub const Map = struct {
     }
 
     pub fn isWalkable(self: *Map, x: i32, y: i32) bool {
-        if (!self.inBounds(x,y)) return false;
-        return self.cells[self.idx(x,y)].walkable;
+        if (!self.inBounds(x, y)) return false;
+        return self.cells[self.idx(x, y)].walkable;
     }
 
     pub fn getBlockingEntity(self: *Map, x: i32, y: i32) ?*Entity {
@@ -104,21 +103,20 @@ pub const Map = struct {
 
     pub fn examine(self: *Map, x: i32, y: i32) []u8 {
         var first = true;
-        var buf = std.ArrayList(u8).init(self.allocator);
-        buf.appendSlice("") catch @panic("oom");
-        defer buf.deinit();
+        var buf: std.ArrayList(u8) = .empty;
+        buf.appendSlice(self.allocator, "") catch @panic("oom");
+        defer buf.deinit(self.allocator);
         for (self.entities.items) |i| {
             if (i.x == x and i.y == y) {
-                if (!first) buf.appendSlice(", ") catch @panic("oom")
-                else first = false;
-                buf.appendSlice(i.name) catch @panic("oom");
+                if (!first) buf.appendSlice(self.allocator, ", ") catch @panic("oom") else first = false;
+                buf.appendSlice(self.allocator, i.name) catch @panic("oom");
             }
         }
-        return buf.toOwnedSlice();
+        return buf.toOwnedSlice(self.allocator) catch @panic("oom");
     }
 
     pub fn isBlocked(self: *Map, x: i32, y: i32) bool {
-        if (self.getBlockingEntity(x,y)) |_| {
+        if (self.getBlockingEntity(x, y)) |_| {
             return true;
         }
         return false;
@@ -128,29 +126,29 @@ pub const Map = struct {
         const size = width * height;
         const cells = try allocator.alloc(Tile, @intCast(size));
         const ents: ArrayList(*Entity) = .empty;
-        var m = Map{.width=width, .height=height, .allocator=allocator, .cells=cells, .entities=ents};
+        var m = Map{ .width = width, .height = height, .allocator = allocator, .cells = cells, .entities = ents };
         m.tcMap = tcod.mapNew(width, height);
         m.fill(WALL);
         return m;
     }
 
     pub fn getRenderOrderedEntities(self: *Map) []*Entity {
-        var ents = self.entities.clone() catch @panic("failed");
-        var entslice = ents.toOwnedSlice();
+        var ents = self.entities.clone(self.allocator) catch @panic("failed");
+        const entslice = ents.toOwnedSlice(self.allocator) catch @panic("failed");
         ents.deinit(self.allocator);
-        std.sort.sort(*Entity, entslice, {}, ent.renderOrderComparator);
+        std.sort.insertion(*Entity, entslice, {}, ent.renderOrderComparator);
         return entslice;
     }
 };
 
 test "map.init" {
     var m = try Map.init(10, 10, std.testing.allocator);
-    defer _ = m.deinit();
+    defer _ = m.deinit(std.testing.allocator);
     try expect(m.cells.len > 0);
 }
 
 test "map.inBounds" {
-    var m = Map{ .width = 10, .height = 10, .allocator=undefined, .cells = undefined, .entities=undefined };
+    var m = Map{ .width = 10, .height = 10, .allocator = undefined, .cells = undefined, .entities = undefined };
     try expect(m.inBounds(0, 0));
     try expect(m.inBounds(5, 5));
     try expect(!m.inBounds(-1, -1));
@@ -159,16 +157,16 @@ test "map.inBounds" {
 }
 
 test "map.inBounds2" {
-    var m = Map{ .width = 40, .height = 25, .allocator=undefined, .cells = undefined, .entities=undefined };
+    var m = Map{ .width = 40, .height = 25, .allocator = undefined, .cells = undefined, .entities = undefined };
     try expect(m.inBounds(39, 24));
 }
 
 test "map.fill should fill all cells with the same kind" {
     var m = try Map.init(2, 2, std.testing.allocator);
-    defer _ = m.deinit();
+    defer _ = m.deinit(std.testing.allocator);
     m.fill(WALL);
-    try expect(std.meta.eql((m.get(0,0)).*, WALL));
-    try expect(std.meta.eql((m.get(0,1)).*, WALL));
-    try expect(std.meta.eql((m.get(1,0)).*, WALL));
-    try expect(std.meta.eql((m.get(1,1)).*, WALL));
+    try expect(std.meta.eql((m.get(0, 0)).*, WALL));
+    try expect(std.meta.eql((m.get(0, 1)).*, WALL));
+    try expect(std.meta.eql((m.get(1, 0)).*, WALL));
+    try expect(std.meta.eql((m.get(1, 1)).*, WALL));
 }
