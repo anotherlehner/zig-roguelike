@@ -8,10 +8,13 @@ pub fn build(b: *std.Build) void {
     const exe = b.addExecutable(.{ .name = "zrl", .root_module = b.createModule(.{ .root_source_file = b.path("src/main.zig"), .target = target, .optimize = optimize }) });
     exe.linkLibC();
     b.installArtifact(exe);
+    const options = b.addOptions();
 
     // Check if TARGET is macOS
     if (target.result.os.tag == .macos) {
+        options.addOption(bool, "use_sdl3", true);
         exe.linkSystemLibrary("tcod");
+        exe.linkSystemLibrary("SDL3");
 
         // specific to Apple Silicon (M1/M2/M3)
         exe.addIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
@@ -21,8 +24,11 @@ pub fn build(b: *std.Build) void {
         exe.addIncludePath(.{ .cwd_relative = "/usr/local/include" });
         exe.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
     } else {
+        options.addOption(bool, "use_sdl3", false);
         exe.linkSystemLibrary("libtcod");
+        exe.linkSystemLibrary("SDL2");
     }
+    exe.root_module.addOptions("config", options);
 
     // Set up the `zig build run` command to execute the app
     const run_cmd = b.addRunArtifact(exe);

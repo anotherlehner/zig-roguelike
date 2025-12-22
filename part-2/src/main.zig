@@ -15,17 +15,22 @@ test {
 }
 
 pub fn main() anyerror!void {
-    tcod.consoleInitRoot(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT, "Zig Roguelike", true);
+    const params = tcod.initContextParams(constants.SCREEN_WIDTH,
+        constants.SCREEN_HEIGHT);
+    const console = tcod.consoleNew(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT);
+    const context = tcod.contextNew(params);
     defer {
+        // Make sure the quit function is called when main() exits
         tcod.quit();
     }
-    tcod.consoleSetCustomFont("../dejavu10x10_gs_tc.png");
 
-    const console = tcod.consoleNew(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT);
+    var player = models.Entity{ .x = constants.SCREEN_WIDTH / 2, .y = constants.SCREEN_HEIGHT / 2,
+        .glyph = constants.ASCII_AT, .color = tcod.TcodColorRGB{ .r = 255, .g = 255,
+            .b = 255 } };
 
-    var player = models.Entity{ .x = constants.SCREEN_WIDTH / 2, .y = constants.SCREEN_HEIGHT / 2, .glyph = constants.ASCII_AT, .color = tcod.TcodColorRGB{ .r = 255, .g = 255, .b = 255 } };
-
-    var npc = models.Entity{ .x = constants.SCREEN_WIDTH / 2 - 5, .y = constants.SCREEN_HEIGHT / 2, .glyph = constants.ASCII_AT, .color = tcod.TcodColorRGB{ .r = 255, .g = 255, .b = 0 } };
+    var npc = models.Entity{ .x = constants.SCREEN_WIDTH / 2 - 5, .y = constants.SCREEN_HEIGHT / 2,
+        .glyph = constants.ASCII_AT, .color = tcod.TcodColorRGB{ .r = 255, .g = 255,
+            .b = 0 } };
 
     var entities = [_]*models.Entity{ &player, &npc };
 
@@ -42,7 +47,7 @@ pub fn main() anyerror!void {
         map.deinit();
     }
 
-    var eng = engine.Engine.init(&entities, &player, console, &map);
+    var eng = engine.Engine.init(&entities, &player, console, &map, context);
 
     while (!tcod.consoleIsWindowClosed()) {
         eng.render();

@@ -1,13 +1,16 @@
 //! zig-roguelike, by Martin Lehner (@anotherlehner)
 const std = @import("std");
+const config = @import("config");
 const expect = std.testing.expect;
 
 // translate and import the libtcod C and libSDL3 library headers
 const c = @cImport({
+    if (config.use_sdl3) {
+        @cInclude("SDL3/SDL.h");
+    } else {
+        @cInclude("SDL2/SDL.h");
+    }
     @cInclude("libtcod.h");
-
-    // Unknown if this is a dangerous idea because I may be mixing namespaces?
-    @cInclude("SDL3/SDL.h");
 });
 
 // using small values now because the resulting window is large and easy to see
@@ -25,9 +28,10 @@ pub fn main() anyerror!void {
         .sdl_window_flags = c.SDL_WINDOW_RESIZABLE,
         .pixel_width = 800,
         .pixel_height = 600,
-        .console = c.TCOD_console_new(40, 25),
+        // .console = c.TCOD_console_new(40, 25), -- TODO: not present in older version of tcod
         .tileset = c.TCOD_tileset_load("../dejavu10x10_gs_tc.png", 32, 8, 256, &c.TCOD_CHARMAP_TCOD)
     };
+    const console = c.TCOD_console_new(40, 25);
 
     var context: ?*c.TCOD_Context = null;
     _ = c.TCOD_context_new(&params, &context);
@@ -44,13 +48,13 @@ pub fn main() anyerror!void {
 
     while (!c.TCOD_console_is_window_closed()) {
         // Clear
-        c.TCOD_console_clear(params.console);
+        c.TCOD_console_clear(console);
 
         // Print
-        c.TCOD_console_print(params.console, playerX, playerY, "@");
+        c.TCOD_console_print(console, playerX, playerY, "@");
 
         // Render (ignore errors)
-        _ = c.TCOD_context_present(context, params.console, null);
+        _ = c.TCOD_context_present(context, console, null);
 
         // Events (ignore errors)
         _ = c.TCOD_sys_check_for_event(c.TCOD_EVENT_KEY_PRESS, &key, null);

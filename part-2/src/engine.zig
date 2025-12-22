@@ -12,6 +12,7 @@ pub const Engine = struct {
     player: *models.Entity,
     console: tcod.TcodConsole,
     map: *models.Map,
+    context: tcod.TcodContext,
 
     pub fn handleEvents(self: *Engine) void {
         var key = initKey();
@@ -28,16 +29,19 @@ pub const Engine = struct {
         for (self.entities) |ent| {
             tcod.consolePutCharEx(self.console, ent.x, ent.y, ent.glyph, ent.color, .{.r=0,.g=0,.b=0});
         }
-        tcod.consoleBlit(self.console, constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT);
+        // tcod.consoleBlit(self.console, constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT);
+        tcod.consolePresent(self.console, self.context);
         tcod.consoleFlush();
     }
 
-    pub fn init(entities: []*models.Entity, player: *models.Entity, console: tcod.TcodConsole, map: *models.Map) Engine {
+    pub fn init(entities: []*models.Entity, player: *models.Entity, console: tcod.TcodConsole, map: *models.Map,
+    context: tcod.TcodContext) Engine {
         return Engine{
             .entities=entities,
             .player=player,
             .console=console,
             .map=map,
+            .context=context
         };
     }
 };
